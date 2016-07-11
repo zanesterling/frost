@@ -7,7 +7,7 @@
 
 bits    16                        ; We are still in 16 bit Real Mode
 
-org    0x7c00                        ; We are loaded by BIOS at 0x7C00
+org    0x7c00                        ; We'll set registers later
 
 start:      jmp loader                    ; jump over OEM block
 
@@ -87,34 +87,6 @@ PrintnDone:
     ret
 
 ;*************************************************;
-;    DS:SI: string 1
-;    DS:DI: string 2
-;    CX: length of strings
-;    AX=> 0 if strings are equal, 1 otherwise
-;*************************************************;
-Strncmp:
-    cmp cx, 0
-    je StrncmpDone
-
-    lodsb
-    mov bl, al
-    xchg si, di
-    lodsb
-    cmp al, bl
-    jne StrncmpFail
-    dec cx
-    inc si
-    inc di
-    jmp Strncmp
-StrncmpFail:
-    mov ax, 1
-    ret
-StrncmpDone:
-    xor ax, ax
-    ret
-
-
-;*************************************************;
 ;    Converts a sector number to CHS
 ;    AX: sector
 ;*************************************************;
@@ -144,7 +116,6 @@ ReadSectors:
     mov al, cl
     mov ch, BYTE [absoluteCylinder]
     mov cl, BYTE [absoluteSector]
-
     mov dh, BYTE [absoluteHead]
     mov dl, BYTE [bsDriveNumber]
     mov ah, 2h
@@ -156,13 +127,10 @@ ReadSectors:
 ;*************************************************;
 
 loader:
-
     ; print msg
-    xor    ax, ax
-    mov    ds, ax
-    mov    es, ax
     mov    si, msg
     call    Print
+
 
     ; Load root dir into memory.
     ; get root dir length in sectors
@@ -172,35 +140,38 @@ loader:
     mov    cx, ax
 
     ; get start of root dir
-    mov    al, [bpbNumberOfFATs]
+    mov    al, BYTE [bpbNumberOfFATs]
     mul    BYTE [bpbSectorsPerFAT]
-    add    ax, [bpbReservedSectors]
+    add    ax, WORD [bpbReservedSectors]
 
     mov    bx, 0x0200
     call   ReadSectors
 
 
     ; Find stage 2 file entry in root dir.
-    mov    cx, WORD [bpbRootEntries]
-    mov    di, 0x0200
-.LOOP:
-    push cx
-    mov cx, 11
-    mov si, di
-    call Printn
-    mov cx, 11
-    mov si, imageName
-    call Strncmp
-    pop cx
-    cmp ax, 0
-    je LOAD_FAT
-    dec cx
-    cmp cx, 0
-    je FAILURE
-    add di, 32
-    jmp .LOOP
+     mov     cx, WORD [bpbRootEntries]
+     mov     di, 0x0200
+LOOPLOC:
+     push    cx
+     cmp cx, [bpbRootEntries]
+     jne CONT
+     mov     cx, 0x000B
+     mov si, di
+     call Printn
+     mov cx, 11
+CONT:
+     mov     si, imageName
+     push    di
+rep  cmpsb
+     pop     di
+     je      LOAD_FAT
+     pop     cx
+     add     di, 0x0020
+     loop    LOOPLOC
+     jmp     FAILURE
 
-;    ; Load FAT into memory.
+
+    ; Load FAT into memory.
 LOAD_FAT:
     mov    ax, WORD [di + 0x1d] ; file size in sectors
     shr    ax, 1
@@ -223,57 +194,54 @@ LOAD_FAT:
     call   ReadSectors
 
 
-;    ; Load clusters for file.
-;LOAD_IMAGE:
-;    mov    ax, WORD [cluster]
-;    sub    ax, 2
-;    mul    BYTE [bpbSectorsPerCluster]
-;    mov    bx, ax
-;    xor    ax, ax
-;    mov    al, BYTE [bpbNumberOfFATs]
-;    mul    BYTE [bpbSectorsPerFAT]
-;    add    ax, 1
-;    add    ax, bx
-;
-;    mov    bx, WORD [bootLoaderCurrentLoc]
-;    xor    cx, cx
-;    mov    cl, BYTE [bpbSectorsPerCluster]
-;    call   ReadSectors
-;
-;    ; increment the current reading destination
-;    xor    ax, ax
-;    mov    al, BYTE [bpbSectorsPerCluster]
-;    mul    BYTE [bpbBytesPerSector]
-;    add    WORD [bootLoaderCurrentLoc], ax
-;
-;    ; get index into fat
-;    mov    ax, WORD [cluster]
-;    mov    bx, ax
-;    shr    bx, 1
-;    add    bx, ax
-;
-;    mov    dx, WORD [bx + 0x0200]
-;    test   ax, 1
-;    jnz    .ODD_CLUSTER
-;
-;.EVEN_CLUSTER:
-;    and    dx, 0x0fff
-;    jmp    .DONE
-;
-;.ODD_CLUSTER:
-;    shr    dx, 4
-;
-;    jmp    WORD [bootLoaderStart]
-;
-;.DONE:
-;    mov    WORD [cluster], dx
-;    cmp    dx, 0xff0
-;    jb     LOAD_IMAGE
+    ; Load clusters for file.
+LOAD_IMAGE:
+    mov    ax, WORD [cluster]
+    sub    ax, 2
+    mul    BYTE [bpbSectorsPerCluster]
+    mov    bx, ax
+    xor    ax, ax
+    mov    al, BYTE [bpbNumberOfFATs]
+    mul    BYTE [bpbSectorsPerFAT]
+    add    ax, 1
+    add    ax, bx
+
+    mov    bx, WORD [bootLoaderCurrentLoc]
+    xor    cx, cx
+    mov    cl, BYTE [bpbSectorsPerCluster]
+    call   ReadSectors
+
+    ; increment the current reading destination
+    xor    ax, ax
+    mov    al, BYTE [bpbSectorsPerCluster]
+    mul    BYTE [bpbBytesPerSector]
+    add    WORD [bootLoaderCurrentLoc], ax
+
+    ; get index into fat
+    mov    ax, WORD [cluster]
+    mov    bx, ax
+    shr    bx, 1
+    add    bx, ax
+
+    mov    dx, WORD [bx + 0x0200]
+    test   ax, 1
+    jnz    .ODD_CLUSTER
+
+.EVEN_CLUSTER:
+    and    dx, 0x0fff
+    jmp    .DONE
+
+.ODD_CLUSTER:
+    shr    dx, 4
+
+    jmp    WORD [bootLoaderStart]
+
+.DONE:
+    mov    WORD [cluster], dx
+    cmp    dx, 0xff0
+    jb     LOAD_IMAGE
 
 FAILURE:
-    xor    ax, ax
-    mov    ds, ax
-    mov    es, ax
     mov    si, failureMessage
     call   Print
 HALT:
