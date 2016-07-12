@@ -8,46 +8,86 @@
 ; We do not have the limitation of 512 bytes here,
 ; so we can add anything we want here!
 
-org 0x0		; offset to 0, we will set segments later
+bits 16     ; we are still in real mode
 
-bits 16		; we are still in real mode
+org 0x500   ; not sure about this
 
 ; we are loaded at linear address 0x10000
 
-jmp main	; jump to main
+jmp main    ; jump to main
+
 
 ;*************************************************;
-;	Prints a string
-;	DS=>SI: 0 terminated string
-;************************************************;
+;   Preprocessor directives
+;*************************************************;
 
-Print:
-			lodsb		; load next byte from string from SI to AL
-			or	al, al	; Does AL=0?
-			jz	PrintDone	; Yep, null terminator found-bail out
-			mov	ah,	0eh	; Nope-Print the character
-			int	10h
-			jmp	Print	; Repeat until null terminator found
-PrintDone:
-			ret		; we are done, so return
+%include "stdio.inc" ; basic io routines
+%include "gdt.inc" ; global descriptor table stuff
+
 
 ;*************************************************;
-;	Second Stage Loader Entry Point
+;   Data segment
+;*************************************************;
+
+LoadingMsg  db  "Preparing to load operating system...",13,10,0
+
+
+;*************************************************;
+;   Second Stage Loader Entry Point
 ;************************************************;
 
 main:
-			cli		; clear interrupts
-			push	cs	; Insure DS=CS
-			pop	ds
 
-			mov	si, Msg
-			call	Print
+    ;********************************;
+    ;   Set up segments and stack
+    ;********************************;
+        cli     ; clear interrupts
+        xor ax, ax ; null the segments
+        mov ds, ax
+        mov es, ax
+        mov ax, 0x9000  ; stack begins at 0x9000 - 0xffff
+        mov ss, ax
+        mov sp, 0xffff
+        sti
 
-			cli		; clear interrupts to prevent triple faults
-			hlt		; hault the system
+    ;********************************;
+    ;   Print loading message
+    ;********************************;
+        mov si, LoadingMsg
+        call Puts16
+
+    ;********************************;
+    ;   Install the GDT
+    ;********************************;
+        call InstallGDT
+
+    ;********************************;
+    ;   Enter protected mode
+    ;********************************;
+        cli
+        mov eax, cr0
+        or eax, 1   ; set pmode bit
+        mov cr0, eax
+        jmp 08h:Stage3 ; far jump to fix CS
+
 
 ;*************************************************;
-;	Data Section
-;************************************************;
+;   Stage 3 entry point
+;*************************************************;
 
-Msg	db	"Preparing to load operating system...",13,10,0
+bits 32
+
+Stage3:
+
+    ;********************************;
+    ;   Set up registers for pmode
+    ;********************************;
+        mov ax, 0x10    ; set data segments to use data selector from gdt
+        mov ds, ax
+        mov ss, ax
+        mov es, ax
+        mov esp, 90000h ; TODO shouldn't this be 0x90000?
+
+    STOP:
+        cli
+        hlt
