@@ -23,6 +23,7 @@ jmp main    ; jump to main
 
 %include "stdio.inc" ; basic io routines
 %include "gdt.inc" ; global descriptor table stuff
+%include "A20.inc" ; helper functions for enabling the A20 line
 
 
 ;*************************************************;
@@ -60,6 +61,11 @@ main:
     ;   Install the GDT
     ;********************************;
         call InstallGDT
+
+    ;********************************;
+    ;   Enable A20 line
+    ;********************************;
+        call EnableA20_KKbrd_Out
 
     ;********************************;
     ;   Enter protected mode
