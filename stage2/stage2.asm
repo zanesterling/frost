@@ -30,7 +30,7 @@ jmp main    ; jump to main
 ;   Data segment
 ;*************************************************;
 
-LoadingMsg  db  "Preparing to load operating system...",13,10,0
+LoadingMsg  db  "abc", 0;"Preparing to load operating system...",13,10,0
 
 
 ;*************************************************;
@@ -92,7 +92,11 @@ Stage3:
         mov ds, ax
         mov ss, ax
         mov es, ax
-        mov esp, 90000h ; TODO shouldn't this be 0x90000?
+        mov esp, 0x90000
+
+        call ClearScr32
+        mov esi, LoadingMsg
+        call Puts32
 
     STOP:
         cli
