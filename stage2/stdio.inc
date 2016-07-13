@@ -39,7 +39,7 @@ bits 32
 %define     VIDMEM  0xB8000
 %define     COLS    80
 %define     LINES   25
-%define     CHAR_ATTRIB 14
+%define     CHAR_ATTRIB 15
 
 ;************************************************;
 ;   Data section
