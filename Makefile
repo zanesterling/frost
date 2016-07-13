@@ -15,7 +15,7 @@ stage1.bin: stage1/stage1.asm
 stage2.bin: stage2/stage2.asm
 	nasm -f bin stage2/stage2.asm -i stage2/ -o stage2.bin
 
-force: clean all
+force: clean all run
 
 clean:
 	rm -f myfloppy.img *.bin

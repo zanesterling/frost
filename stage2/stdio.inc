@@ -126,7 +126,7 @@ Puts32:
         jmp .loop
 
     .done:
-        ;call MovCur
+        call MovCur
 
         popa
         ret
@@ -138,11 +138,13 @@ Puts32:
 ;************************************************;
 
 MovCur:
-        ; find memory location of cursor
+        pusha
+
+        ; find memory offset of cursor
         xor eax, eax
         mov al, byte [_CurY]
-        mov ecx, COLS
-        mul ecx
+        mov cl, COLS
+        mul cl
         add al, byte [_CurX]
         mov ebx, eax
 
@@ -164,6 +166,9 @@ MovCur:
         mov al, bh
         mov dx, 0x03d5
         out dx, al
+
+        popa
+        ret
 
 
 ;************************************************;
