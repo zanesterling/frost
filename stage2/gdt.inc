@@ -9,6 +9,9 @@
 %define __GDT_INC_67343546FDCC56AAB872_INCLUDED__
  
 bits	16
+
+%define CODE_DESC 0x8
+%define DATA_DESC 0x10
  
 ;*******************************************
 ; InstallGDT()

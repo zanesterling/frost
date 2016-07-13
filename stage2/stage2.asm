@@ -24,13 +24,17 @@ jmp main    ; jump to main
 %include "util/stdio.inc" ; basic io routines
 %include "stage2/gdt.inc" ; global descriptor table stuff
 %include "stage2/A20.inc" ; helper functions for enabling the A20 line
+%include "stage2/Fat12.inc" ; fat12 driver
+%include "stage2/Floppy16.inc" ; floppy driver
+%include "stage2/common.inc" ; common definitions
 
 
 ;*************************************************;
 ;   Data segment
 ;*************************************************;
 
-LoadingMsg  db  "abc", 0;"Preparing to load operating system...",13,10,0
+LoadingMsg db "Preparing to load operating system...",13,10,0
+MsgFailure db 0x0d, 0x0a, "ERROR: file kernel.sys not found. Press any key to reboot.", 0x0d, 0x0a, 0
 
 
 ;*************************************************;
@@ -68,13 +72,49 @@ main:
         call EnableA20_KKbrd_Out
 
     ;********************************;
+    ;   Print loading message
+    ;********************************;
+        mov si, LoadingMsg
+        call Puts16
+
+    ;********************************;
+    ;   Initialize filesystem
+    ;********************************;
+        call LoadRoot
+
+    ;********************************;
+    ;   Load kernel
+    ;********************************;
+        ; set bp:bx to dest buffer
+        mov bp, IMAGE_RMODE_BASE
+        mov ebx, 0
+
+        mov si, ImageName
+        call LoadFile
+        mov dword [ImageSize], ecx
+        cmp ax, 0
+        je EnterStage3
+
+        ; failed to find kernel
+        mov si, MsgFailure
+        call Puts16
+
+        ; wait for keypress, then reboot
+        mov ah, 0
+        int 0x16
+        int 0x19
+        cli ; should never get here
+        hlt
+
+    ;********************************;
     ;   Enter protected mode
     ;********************************;
+    EnterStage3:
         cli
         mov eax, cr0
         or eax, 1   ; set pmode bit
         mov cr0, eax
-        jmp 08h:Stage3 ; far jump to fix CS
+        jmp CODE_DESC:Stage3 ; far jump to fix CS
 
 
 ;*************************************************;
@@ -88,7 +128,7 @@ Stage3:
     ;********************************;
     ;   Set up registers for pmode
     ;********************************;
-        mov ax, 0x10    ; set data segments to use data selector from gdt
+        mov ax, DATA_DESC
         mov ds, ax
         mov ss, ax
         mov es, ax
@@ -97,6 +137,27 @@ Stage3:
         call ClearScr32
         mov esi, LoadingMsg
         call Puts32
+
+    ;********************************;
+    ;   Copy kernel to 1mb
+    ;********************************;
+    CopyImage:
+        mov eax, dword [ImageSize]
+        movzx ebx, word [bpbBytesPerSector]
+        mul ebx
+        mov ebx, 4
+        div ebx
+        cld
+        mov esi, IMAGE_RMODE_BASE
+        mov edi, IMAGE_PMODE_BASE
+        mov ecx, eax
+    rep movsd
+
+    ;********************************;
+    ;   Execute kernel
+    ;********************************;
+
+    jmp CODE_DESC:IMAGE_PMODE_BASE
 
     STOP:
         cli
