@@ -10,10 +10,10 @@ myfloppy.img: stage1.bin stage2.bin
 	dcopy stage2.bin myfloppy.img KRNLDR.SYS
 
 stage1.bin: stage1/stage1.asm
-	nasm -f bin stage1/stage1.asm -i stage1/ -o boot1.bin
+	nasm -f bin stage1/stage1.asm -o boot1.bin
 
 stage2.bin: stage2/stage2.asm
-	nasm -f bin stage2/stage2.asm -i stage2/ -o stage2.bin
+	nasm -f bin stage2/stage2.asm -o stage2.bin
 
 force: clean all run
 

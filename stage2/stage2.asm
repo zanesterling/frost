@@ -21,9 +21,9 @@ jmp main    ; jump to main
 ;   Preprocessor directives
 ;*************************************************;
 
-%include "stdio.inc" ; basic io routines
-%include "gdt.inc" ; global descriptor table stuff
-%include "A20.inc" ; helper functions for enabling the A20 line
+%include "util/stdio.inc" ; basic io routines
+%include "stage2/gdt.inc" ; global descriptor table stuff
+%include "stage2/A20.inc" ; helper functions for enabling the A20 line
 
 
 ;*************************************************;
