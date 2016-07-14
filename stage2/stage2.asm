@@ -72,12 +72,6 @@ main:
         call EnableA20_KKbrd_Out
 
     ;********************************;
-    ;   Print loading message
-    ;********************************;
-        mov si, LoadingMsg
-        call Puts16
-
-    ;********************************;
     ;   Initialize filesystem
     ;********************************;
         call LoadRoot
@@ -123,6 +117,8 @@ main:
 
 bits 32
 
+MsgToKernel db "Jumping to kernel", 0x0a, 0
+
 Stage3:
 
     ;********************************;
@@ -135,7 +131,7 @@ Stage3:
         mov esp, 0x90000
 
         call ClearScr32
-        mov esi, LoadingMsg
+        mov esi, MsgToKernel
         call Puts32
 
     ;********************************;
