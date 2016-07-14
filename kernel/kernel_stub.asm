@@ -1,11 +1,11 @@
-org     0x10000
+org     0x100000
 bits    32
 
 jmp Stage3
 
 %include "util/stdio.inc"
 
-msg db 0x0a, 0x0a, "Welcome to Kernel Land!", 0x0a, 0
+msg db "Welcome to Kernel Land!", 0x0a, 0
 
 Stage3:
         
@@ -18,7 +18,7 @@ Stage3:
 
         ; clear screen and print success
         call ClearScr32
-        mov ebx, msg
+        mov esi, msg
         call Puts32
 
         cli
