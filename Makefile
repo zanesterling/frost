@@ -10,11 +10,11 @@ myfloppy.img: stage1.bin stage2.bin kernel.bin
 	dcopy stage2.bin myfloppy.img KRNLDR.SYS
 	dcopy kernel.bin myfloppy.img KERNEL.SYS
 
-stage1.bin: stage1/stage1.asm
-	nasm -f bin $+ -o $@
+stage1.bin: boot/stage1/stage1.asm
+	nasm -f bin -i boot/ $+ -o $@
 
-stage2.bin: stage2/stage2.asm
-	nasm -f bin $+ -o $@
+stage2.bin: boot/stage2/stage2.asm
+	nasm -f bin -i boot/ $+ -o $@
 
 kernel.bin: kernel/kernel_stub.asm
 	nasm -f bin $+ -o $@
