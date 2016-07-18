@@ -35,8 +35,8 @@ $(BUILD_DIR)/%.o: core/lib/%.c
 	$(CC) $(CFLAGS) -c $+ -o $@
 
 $(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c $(OBJ_FILES)
-	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel
-	objcopy -O binary -j .text -j .rodata $(BUILD_DIR)/kernel $@
+	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.elf
+	objcopy -O binary -j .text -j .rodata $(BUILD_DIR)/kernel.elf $@
 
 build: clean all
 force: clean all run
