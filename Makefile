@@ -16,10 +16,12 @@ stage1.bin: boot/stage1/stage1.asm
 stage2.bin: boot/stage2/stage2.asm
 	nasm -f bin -i boot/ $+ -o $@
 
-kernel.bin: kernel/kernel_stub.asm
-	nasm -f bin $+ -o $@
+kernel.bin: core/kernel/main.c core/kernel/entry.c #core/kernel/kernel_stub.asm
+	gcc -Wall -pedantic-errors -m32 $+ -nostdlib -Wl,-Ttext=0x20000,-nostdlib -o kernel
+	objcopy -O binary -j .text kernel $@
+	#nasm -f bin $+ -o $@
 
 force: clean all run
 
 clean:
-	rm -f myfloppy.img *.bin
+	rm -f myfloppy.img *.bin kernel
