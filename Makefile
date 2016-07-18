@@ -17,7 +17,7 @@ stage2.bin: boot/stage2/stage2.asm
 	nasm -f bin -i boot/ $+ -o $@
 
 kernel.bin: core/kernel/main.c core/kernel/entry.c #core/kernel/kernel_stub.asm
-	gcc -Wall -pedantic-errors -m32 $+ -nostdlib -Wl,-Ttext=0x20000,-nostdlib -o kernel
+	gcc -Wall -pedantic-errors -m32 $+ -nostdlib -Wl,-Ttext=0x100000,-nostdlib -o kernel
 	objcopy -O binary -j .text kernel $@
 	#nasm -f bin $+ -o $@
 
