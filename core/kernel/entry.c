@@ -4,10 +4,13 @@
  * Called from the bootloader.
  */
 
+#if !(defined(__i386) || defined(_M_IX86))
+#error Only x86 is supported.
+#endif
+
 extern void main();
 
 void kernel_entry() {
-#if defined(__i386) || defined(_M_IX86)
 	asm(
 		/* set data segments to data selector */
 		"mov %ax, 0x10\n"
@@ -20,9 +23,6 @@ void kernel_entry() {
 		"mov %ebp, %esp\n"
 		"push %ebp\n"
 	);
-#else
-#error Only x86 is supported.
-#endif
 
 	main();
 
