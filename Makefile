@@ -7,6 +7,8 @@ BUILD_DIR=builddir
 
 BINARIES=stage1.bin stage2.bin kernel.bin
 BIN_FILES = $(addprefix $(BUILD_DIR)/, $(BINARIES))
+LIB_FILES = $(wildcard core/lib/*.c)
+OBJ_FILES = $(addprefix $(BUILD_DIR)/, $(patsubst core/lib/%.c,%.o,$(LIB_FILES)))
 
 IMAGE = myfloppy.img
 
@@ -29,9 +31,11 @@ $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 $(BUILD_DIR)/stage2.bin: boot/stage2/stage2.asm
 	nasm -f bin -i boot/ $+ -o $@
 
-$(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c
-	$(CC) $(CFLAGS) -c core/lib/io.c -o $(BUILD_DIR)/io.o
-	$(CC) $(CFLAGS) $+ $(BUILD_DIR)/io.o $(LFLAGS) -o $(BUILD_DIR)/kernel
+$(BUILD_DIR)/%.o: core/lib/%.c
+	$(CC) $(CFLAGS) -c $+ -o $@
+
+$(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c $(OBJ_FILES)
+	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel
 	objcopy -O binary -j .text -j .rodata $(BUILD_DIR)/kernel $@
 
 build: clean all

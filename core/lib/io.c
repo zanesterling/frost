@@ -29,13 +29,3 @@ void MoveCursor() {
 	outbyte(0x03d4, 0x0e);
 	outbyte(0x03d5, (val >> 8) & 0xff);
 }
-
-unsigned char inbyte(unsigned short port) {
-	unsigned char ret;
-	asm("inb %1, %0" : "=a" (ret) : "d" (port));
-	return ret;
-}
-
-void outbyte(unsigned short port, unsigned char data) {
-	asm("outb %1, %0" : : "d" (port), "a" (data));
-}
