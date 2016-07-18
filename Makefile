@@ -1,5 +1,9 @@
 .PHONY: clean force run all
 
+CC=gcc
+CFLAGS = -Wall -pedantic-errors -m32 -Icore/include
+LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
+
 all: myfloppy.img
 
 run: myfloppy.img
@@ -17,11 +21,13 @@ stage2.bin: boot/stage2/stage2.asm
 	nasm -f bin -i boot/ $+ -o $@
 
 kernel.bin: core/kernel/main.c core/kernel/entry.c #core/kernel/kernel_stub.asm
-	gcc -Wall -pedantic-errors -m32 $+ -nostdlib -Wl,-Ttext=0x100000,-nostdlib -o kernel
-	objcopy -O binary -j .text kernel $@
+	$(CC) $(CFLAGS) -c core/lib/io.c
+	$(CC) $(CFLAGS) $+ io.o $(LFLAGS) -o kernel
+	objcopy -O binary -j .text -j .rodata kernel $@
 	#nasm -f bin $+ -o $@
 
+build: clean all
 force: clean all run
 
 clean:
-	rm -f myfloppy.img *.bin kernel
+	rm -f myfloppy.img *.bin kernel *.o
