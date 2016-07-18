@@ -1,6 +1,8 @@
 #pragma once
 
 #include "asm.h"
+#include "stdarg.h"
+#include "string.h"
 
 #define VID_MEM 0xB8000
 #define COLS 80

@@ -1,7 +1,7 @@
 .PHONY: clean force run all
 
 CC=gcc
-CFLAGS = -Wall -pedantic-errors -m32 -Icore/include
+CFLAGS = -std=gnu99 -Wall -pedantic-errors -m32 -Icore/include -fno-stack-protector
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
 BUILD_DIR=builddir
 
