@@ -3,31 +3,40 @@
 CC=gcc
 CFLAGS = -Wall -pedantic-errors -m32 -Icore/include
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
+BUILD_DIR=builddir
 
-all: myfloppy.img
+BINARIES=stage1.bin stage2.bin kernel.bin
+BIN_FILES = $(addprefix $(BUILD_DIR)/, $(BINARIES))
 
-run: myfloppy.img
-	qemu-system-i386 -fda myfloppy.img -boot a -no-fd-bootchk
+IMAGE = myfloppy.img
 
-myfloppy.img: stage1.bin stage2.bin kernel.bin
-	cat stage1.bin /dev/zero | dd of=myfloppy.img bs=1024 count=1440
-	dcopy stage2.bin myfloppy.img KRNLDR.SYS
-	dcopy kernel.bin myfloppy.img KERNEL.SYS
+all: $(IMAGE)
 
-stage1.bin: boot/stage1/stage1.asm
+run: $(IMAGE)
+	qemu-system-i386 -fda $(IMAGE) -boot a -no-fd-bootchk
+
+$(IMAGE): $(BUILD_DIR) $(BIN_FILES)
+	cat $(BUILD_DIR)/stage1.bin /dev/zero | dd of=$(IMAGE) bs=1024 count=1440
+	dcopy $(BUILD_DIR)/stage2.bin $(IMAGE) KRNLDR.SYS
+	dcopy $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 	nasm -f bin -i boot/ $+ -o $@
 
-stage2.bin: boot/stage2/stage2.asm
+$(BUILD_DIR)/stage2.bin: boot/stage2/stage2.asm
 	nasm -f bin -i boot/ $+ -o $@
 
-kernel.bin: core/kernel/main.c core/kernel/entry.c #core/kernel/kernel_stub.asm
-	$(CC) $(CFLAGS) -c core/lib/io.c
-	$(CC) $(CFLAGS) $+ io.o $(LFLAGS) -o kernel
-	objcopy -O binary -j .text -j .rodata kernel $@
-	#nasm -f bin $+ -o $@
+$(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c
+	$(CC) $(CFLAGS) -c core/lib/io.c -o $(BUILD_DIR)/io.o
+	$(CC) $(CFLAGS) $+ $(BUILD_DIR)/io.o $(LFLAGS) -o $(BUILD_DIR)/kernel
+	objcopy -O binary -j .text -j .rodata $(BUILD_DIR)/kernel $@
 
 build: clean all
 force: clean all run
 
 clean:
-	rm -f myfloppy.img *.bin kernel *.o
+	rm -f $(IMAGE) *.bin kernel *.o
+	rm -rf $(BUILD_DIR)
