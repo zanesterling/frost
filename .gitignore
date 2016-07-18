@@ -1,5 +1,5 @@
 dcopy
 *.bin
 myfloppy.img
-kernel
 *.o
+builddir
