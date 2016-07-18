@@ -1,4 +1,6 @@
 #pragma once
 
-unsigned char inbyte(unsigned short port);
-void outbyte(unsigned short port, unsigned char data);
+#include "stdint.h"
+
+uint8 inbyte(uint16 port);
+void outbyte(uint16 port, uint8 data);

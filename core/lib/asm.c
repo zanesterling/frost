@@ -1,11 +1,11 @@
 #include "asm.h"
 
-unsigned char inbyte(unsigned short port) {
-	unsigned char ret;
+uint8 inbyte(uint16 port) {
+	uint8 ret;
 	asm("inb %1, %0" : "=a" (ret) : "d" (port));
 	return ret;
 }
 
-void outbyte(unsigned short port, unsigned char data) {
+void outbyte(uint16 port, uint8 data) {
 	asm("outb %1, %0" : : "d" (port), "a" (data));
 }
