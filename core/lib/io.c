@@ -1,7 +1,7 @@
 #include "io.h"
 
-char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-char hex_chars[16] = {
+const char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+const char hex_chars[16] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
 
@@ -98,7 +98,7 @@ void itoa(int x, char* buf) {
 	itoa_s(x, buf, 10, base_10_chars);
 }
 
-void itoa_s(int x, char* buf, size_t base, char* base_chars) {
+void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
 		buf[1] = 0;
