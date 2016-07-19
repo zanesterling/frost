@@ -2,4 +2,4 @@ dcopy
 *.bin
 myfloppy.img
 *.o
-builddir
+build
