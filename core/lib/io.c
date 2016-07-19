@@ -1,5 +1,10 @@
 #include "io.h"
 
+char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+char hex_chars[16] = {
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+};
+
 void putch(const char c) {
 	if (_CurY == ROWS) {
 		scroll(1);
@@ -49,9 +54,6 @@ void printf(const char* fmt, ...) {
 	va_list argp;
 	va_start(argp, fmt);
 
-	char hex_chars[16] = {
-		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-	};
 
 	for (p = fmt; *p; p++) {
 		if (*p != '%') {
@@ -93,7 +95,6 @@ void printf(const char* fmt, ...) {
 }
 
 void itoa(int x, char* buf) {
-	char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 	itoa_s(x, buf, 10, base_10_chars);
 }
 

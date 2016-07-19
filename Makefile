@@ -1,4 +1,4 @@
-.PHONY: clean force run all
+.PHONY: build_dir clean force run all
 
 CC=gcc
 CFLAGS = -std=gnu99 -Wall -pedantic-errors -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function
@@ -36,7 +36,7 @@ $(BUILD_DIR)/%.o: core/lib/%.c
 
 $(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c $(OBJ_FILES)
 	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.elf
-	objcopy -O binary -j .text -j .rodata $(BUILD_DIR)/kernel.elf $@
+	objcopy -O binary -j .text -j .data -j .rodata $(BUILD_DIR)/kernel.elf $@
 
 build: clean all
 force: clean all run
