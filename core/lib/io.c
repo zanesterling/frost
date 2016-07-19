@@ -1,6 +1,6 @@
 #include "io.h"
 
-void Putch(const char c) {
+void putch(const char c) {
 	if (_CurY == ROWS) {
 		scroll(1);
 	}
@@ -25,9 +25,9 @@ void scroll(const uint8 numRows) {
 	memcpy((uint16*)VID_MEM, offset, VID_MEM_MAX - VID_MEM - 2 * numRows * COLS);
 }
 
-void Puts(const char* str) {
+void puts(const char* str) {
 	for (; *str != 0; ++str) {
-		Putch(*str);
+		putch(*str);
 	}
 
 	moveCursor();
@@ -39,4 +39,82 @@ void moveCursor() {
 	outbyte(0x03d5, val & 0xff);
 	outbyte(0x03d4, 0x0e);
 	outbyte(0x03d5, (val >> 8) & 0xff);
+}
+
+void printf(const char* fmt, ...) {
+	const char *p;
+	int x;
+	char* str;
+	char buf[32];
+	va_list argp;
+	va_start(argp, fmt);
+
+	char hex_chars[16] = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+	};
+
+	for (p = fmt; *p; p++) {
+		if (*p != '%') {
+			putch(*p);
+			continue;
+		}
+
+		switch (*++p) {
+			case 'c':
+				x = va_arg(argp, int);
+				putch(x);
+				break;
+
+			case 'd':
+			case 'i':
+				x = va_arg(argp, int);
+				itoa(x, buf);
+				puts(buf);
+				break;
+
+			case 'x':
+				x = va_arg(argp, int);
+				itoa_s(x, buf, 16, hex_chars);
+				putch('0');
+				putch('x');
+				puts(buf);
+				break;
+
+			case 's':
+				str = va_arg(argp, char*);
+				while (*str) putch(*str++);
+				break;
+
+			case '%':
+				putch('%');
+				break;
+		}
+	}
+}
+
+void itoa(int x, char* buf) {
+	char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+	itoa_s(x, buf, 10, base_10_chars);
+}
+
+void itoa_s(int x, char* buf, size_t base, char* base_chars) {
+	if (x == 0) {
+		buf[0] = base_chars[0];
+		buf[1] = 0;
+		return;
+	}
+
+	uint8 len = 0;
+	while (x > 0) {
+		buf[len++] = base_chars[x % base];
+		x /= base;
+	}
+
+	/* int gets put in backwards, reverse it */
+	for (uint8 i = 0; i < len / 2; i++) {
+		char tmp = buf[i];
+		buf[i] = buf[len-1 - i];
+		buf[len-1 - i] = tmp;
+	}
+	buf[len] = 0;
 }

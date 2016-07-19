@@ -12,7 +12,11 @@
 
 unsigned char _CurX, _CurY;
 
-void Putch(const char c);
+void putch(const char c);
 void scroll(const uint8 numRows);
-void Puts(const char* str);
+void puts(const char* str);
 void moveCursor();
+void printf(const char* fmt, ...);
+
+void itoa(int x, char* buf);
+void itoa_s(int x, char* buf, size_t base, char* base_chars);

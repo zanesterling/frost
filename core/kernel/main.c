@@ -1,10 +1,13 @@
 #include "main.h"
 
 int main() {
-	Puts("Hello, world of kernels\n");
-	for (int i = 0; i < 30; i++) {
-		Putch('a' + i % 26);
-		Putch('\n');
-	}
+	printf(
+		"Hello, %c%s%c.\nThe ultimate answer is %d (%x in hex).",
+		'`',
+		"world of kernels",
+		'\'',
+		42,
+		42
+	);
 	return 0;
 }
