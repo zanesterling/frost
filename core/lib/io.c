@@ -1,5 +1,7 @@
 #include "io.h"
 
+/* OUTPUT */
+
 const char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 const char hex_chars[16] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
@@ -94,6 +96,8 @@ void printf(const char* fmt, ...) {
 	}
 }
 
+/* UTILITIES */
+
 void itoa(int x, char* buf) {
 	itoa_s(x, buf, 10, base_10_chars);
 }
@@ -118,4 +122,17 @@ void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
 		buf[len-1 - i] = tmp;
 	}
 	buf[len] = 0;
+}
+
+/* INPUT */
+
+char getch() {
+	return scancodes[getScancode() + 1];
+}
+
+uint8 getScancode() {
+	while (1) {
+		uint8 c = inbyte(0x60);
+		if (c) return c;
+	}
 }

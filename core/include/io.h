@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asm.h"
+#include "scancodes.h"
 #include "stdarg.h"
 #include "string.h"
 
@@ -20,3 +21,6 @@ void printf(const char* fmt, ...);
 
 void itoa(const int x, char* buf);
 void itoa_s(const int x, char* buf, const size_t base, const char* base_chars);
+
+char getch();
+uint8 getScancode();
