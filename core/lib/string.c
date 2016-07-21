@@ -14,3 +14,11 @@ void* memcpy(void* dest, void* src, size_t n) {
 	}
 	return dest;
 }
+
+void* memset(void* s, uint8_t x, size_t n) {
+	uint8_t* dest = (uint8_t*) s;
+	for (; n--;) {
+		*dest++ = x;
+	}
+	return s;
+}

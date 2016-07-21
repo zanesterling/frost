@@ -108,7 +108,7 @@ void kbrd_enable() {
 
 
 /* Client library */
-uint8_t kbrd_read_input() {}
+uint8_t kbrd_read_input() { return 0; }
 uint8_t kbrd_read_output();
 void kbrd_write_output(uint8_t);
 
