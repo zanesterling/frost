@@ -1,12 +1,22 @@
 #include "io.h"
 
-/* OUTPUT */
+/* Private stuff */
+static void moveCursor() {
+	unsigned short val = _CurY * COLS + _CurX;
+	outbyte(0x03d4, 0x0f);
+	outbyte(0x03d5, val & 0xff);
+	outbyte(0x03d4, 0x0e);
+	outbyte(0x03d5, (val >> 8) & 0xff);
+}
 
-const char base_10_chars[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-const char hex_chars[16] = {
+static const char base_10_chars[10] = {
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+};
+static const char hex_chars[16] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
 
+/* Public stuff */
 void putch(const char c) {
 	if (_CurY == ROWS) {
 		scroll(1);
@@ -38,14 +48,6 @@ void puts(const char* str) {
 	}
 
 	moveCursor();
-}
-
-void moveCursor() {
-	unsigned short val = _CurY * COLS + _CurX;
-	outbyte(0x03d4, 0x0f);
-	outbyte(0x03d5, val & 0xff);
-	outbyte(0x03d4, 0x0e);
-	outbyte(0x03d5, (val >> 8) & 0xff);
 }
 
 void printf(const char* fmt, ...) {
@@ -94,6 +96,17 @@ void printf(const char* fmt, ...) {
 				break;
 		}
 	}
+}
+
+void clearScreen() {
+	uint16_t* p = (uint16_t*) VID_MEM;
+	for (size_t i = 0; i < COLS * ROWS; i++) {
+		*p++ = 0;
+	}
+
+	_CurX = 0;
+	_CurY = 0;
+	moveCursor();
 }
 
 /* UTILITIES */
