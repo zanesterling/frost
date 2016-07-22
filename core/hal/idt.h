@@ -22,7 +22,7 @@ struct idt_descriptor {
 	uint8_t reserved; // should be zero
 	uint8_t flags;
 	uint16_t baseHigh;
-} idt_descriptor ;
+} idt_descriptor;
 
 #pragma pack(pop)
 

@@ -22,7 +22,6 @@ static void idt_install() {
 /* Interrupt handlers */
 
 void i86_default_handler() {
-	clearScreen();
 	puts("*** [i86 Hal] i86_default_handler: Unhandled Exception");
 	for (;;);
 }
@@ -32,7 +31,7 @@ int i86_install_ir(
 ) {
 	if (!irq) return -1;
 
-	uint32_t uiBase = (uint32_t)&(*irq);
+	uint32_t uiBase = (uint32_t)irq;
 
 	_idt[ir_num].baseLow  = uiBase & 0xffff;
 	_idt[ir_num].baseHigh = (uiBase >> 16) & 0xffff;
@@ -49,13 +48,16 @@ int i86_idt_initialize(uint16_t code_selector) {
 	memset(_idt, 0, _idtr.limit);
 
 	for (int i = 0; i < I86_MAX_INTERRUPTS; i++) {
-		i86_install_ir(
+		int ret = i86_install_ir(
 			i,
 			I86_IDT_DESC_PRESENT | I86_IDT_DESC_BIT32,
 			code_selector,
 			(I86_IRQ_HANDLER) i86_default_handler
 		);
+		if (ret) return ret;
 	}
+
+	printf("0x%x:0x%x %x\n", _idt[0].selector, _idt[0].baseHigh, _idt[0].baseLow);
 
 	idt_install();
 	return 0;

@@ -81,8 +81,6 @@ void printf(const char* fmt, ...) {
 			case 'x':
 				x = va_arg(argp, int);
 				itoa_s(x, buf, 16, hex_chars);
-				putch('0');
-				putch('x');
 				puts(buf);
 				break;
 
