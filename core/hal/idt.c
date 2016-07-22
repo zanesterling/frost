@@ -57,8 +57,6 @@ int i86_idt_initialize(uint16_t code_selector) {
 		if (ret) return ret;
 	}
 
-	printf("0x%x:0x%x %x\n", _idt[0].selector, _idt[0].baseHigh, _idt[0].baseLow);
-
 	idt_install();
 	return 0;
 }

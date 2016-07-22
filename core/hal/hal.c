@@ -14,12 +14,10 @@ int hal_shutdown() {
 
 void geninterrupt(uint8_t n) {
 	asm(
-		/*
 		"mov genint%=, %%ebx\n"
 		"movb %%al, 1(%%ebx)\n"
-		*/
-		"genint:\n"
+		"genint%=:\n"
 		"int $0\n"
-		//:: "a" (n)
+		:: "a" (n)
 	);
 }

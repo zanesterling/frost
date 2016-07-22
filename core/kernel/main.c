@@ -5,7 +5,7 @@ int main() {
 	int hal_err = hal_initialize();
 	if (hal_err) printf("hal_err: %x\n", hal_err);
 
-	geninterrupt(0);
+	geninterrupt(35);
 
 	//ShellState state;
 	//runShell(&state);
