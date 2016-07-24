@@ -15,16 +15,17 @@ static struct idt_descriptor _idt[I86_MAX_INTERRUPTS];
 static struct idtr _idtr;
 
 static void idt_install() {
-	asm("lidt (%0)" :: "r" (&_idtr));
+	asm("lidt [%0]" :: "r" (&_idtr));
 }
 
-/* Public stuff */
 /* Interrupt handlers */
 
 void i86_default_handler() {
 	puts("*** [i86 Hal] i86_default_handler: Unhandled Exception");
 	for (;;);
 }
+
+/* Public stuff */
 
 int i86_install_ir(
 	uint8_t ir_num, uint16_t flags, uint16_t selector, I86_IRQ_HANDLER irq

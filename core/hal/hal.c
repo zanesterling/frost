@@ -13,11 +13,12 @@ int hal_shutdown() {
 }
 
 void geninterrupt(uint8_t n) {
+	//*((uint8_t*)geninterrupt + 12 + 16 + 8) = n;
 	asm(
-		"mov genint%=, %%ebx\n"
-		"movb %%al, 1(%%ebx)\n"
+		"lea eax, genint%=\n"
+		"movb [eax+1], bl\n"
 		"genint%=:\n"
-		"int $0\n"
-		:: "a" (n)
+		"int 0\n"
+		:: "b" (n)
 	);
 }

@@ -2,7 +2,7 @@
 
 CC=gcc
 OBJCOPY=objcopy
-CFLAGS = -std=gnu99 -Wall -Wextra -pedantic-errors -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function
+CFLAGS = -g -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel # -pedantic-errors
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
 BUILD_DIR=build
 
@@ -23,6 +23,9 @@ all: $(IMAGE)
 
 run: $(IMAGE)
 	qemu-system-i386 -fda $(IMAGE) -boot a -no-fd-bootchk
+
+run-debug: $(IMAGE)
+	qemu-system-i386 -fda $(IMAGE) -boot a -no-fd-bootchk -s -S
 
 $(IMAGE): build_dir $(BIN_FILES)
 	cat $(BUILD_DIR)/stage1.bin /dev/zero | dd of=$(IMAGE) bs=1024 count=1440

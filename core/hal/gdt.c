@@ -14,7 +14,7 @@ static struct gdt_descriptor _gdt[MAX_DESCRIPTORS];
 static struct gdtr _gdtr;
 
 static void gdt_install() {
-	asm("lgdt (%0)" :: "r" (&_gdtr));
+	asm("lgdt [%0]" :: "r" (&_gdtr));
 }
 
 /* PUBLIC STUFF */

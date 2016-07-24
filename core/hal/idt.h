@@ -26,5 +26,5 @@ struct idt_descriptor {
 
 #pragma pack(pop)
 
-void i86_default_handler();
+int i86_install_ir(uint8_t ir_num, uint16_t flags, uint16_t selector, I86_IRQ_HANDLER irq);
 int i86_idt_initialize(uint16_t code_selector);
