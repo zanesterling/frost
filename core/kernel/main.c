@@ -7,7 +7,7 @@ int main() {
 	int hal_err = hal_initialize();
 	if (hal_err) printf("hal_err: %x\n", hal_err);
 
-	i86_install_ir(5, I86_IDT_DESC_PRESENT | I86_IDT_DESC_BIT32, 8, (I86_IRQ_HANDLER)int_handler_5);
+	setvect(5, int_handler_5);
 	puts("generating interrupt 5\n");
 	geninterrupt(5);
 	puts("done interrupting\n");

@@ -1,5 +1,8 @@
 #include "pic.h"
 
+#include "hal.h"
+#include "idt.h"
+
 int i86_pic_initialize() {
 	// ICW 1
 	i86_pic_send_command(0x11, 0);
@@ -20,10 +23,6 @@ int i86_pic_initialize() {
 	return 0;
 }
 
-inline void sendeoi() {
-	outbyte(PIC_PORT_COMMAND, 0x20);
-}
-
 inline void i86_pic_send_command(uint8_t cmd, uint8_t pic) {
 	if (pic > 1) {
 		return;
@@ -42,11 +41,15 @@ inline void i86_pic_send_data(uint8_t data, uint8_t pic) {
 	outbyte(reg, data);
 }
 
-inline uint8_t i86_pic_read_data(uint8_t pic) {
+inline int16_t i86_pic_read_data(uint8_t pic) {
 	if (pic > 1) {
-		return;
+		return -1;
 	}
 
 	uint8_t reg = pic ? I86_PIC2_PORT_DATA_REG : I86_PIC_PORT_DATA_REG;
-	inbyte(reg);
+	return inbyte(reg);
+}
+
+inline void sendeoi() {
+	outbyte(I86_PIC_PORT_COMMAND, 0x20);
 }
