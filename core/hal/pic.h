@@ -1,7 +1,6 @@
 #pragma once
 
-#include "asm.h"
-#include "stdint.h"
+#include <stdint.h>
 
 // PIC ports
 #define I86_PIC_PORT_COMMAND     0x20
@@ -45,7 +44,7 @@
 #define		I86_PIC_OCW3_MASK_ESMM		0x40	//01000000
 #define		I86_PIC_OCW3_MASK_D7		0x80	//10000000
 
-int i86_pic_initialize();
+void i86_pic_initialize();
 void i86_pic_send_command(uint8_t cmd, uint8_t pic);
 void i86_pic_send_data(uint8_t data, uint8_t pic);
 int16_t i86_pic_read_data(uint8_t pic);

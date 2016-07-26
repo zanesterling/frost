@@ -15,8 +15,6 @@
 
 uint32_t _pit_ticks = 0;
 
-int i86_pit_initialize();
-
 void set_counter() {
 	uint16_t count = 1193180 / 100;
 	i86_pit_send_command(0x36);
@@ -67,4 +65,8 @@ void i86_pit_start_counter(uint32_t freq, uint8_t counter, uint8_t mode) {
 	i86_pit_send_data(divisor, 0);
 
 	_pit_ticks = 0;
+}
+
+void i86_pit_initialize() {
+	setvect(32, i86_pit_irq);
 }

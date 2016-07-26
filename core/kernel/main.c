@@ -4,8 +4,15 @@ void int_handler_5();
 
 int main() {
 	puts("Hello, world of kernels\n\n");
+
 	int hal_err = hal_initialize();
 	if (hal_err) printf("hal_err: %x\n", hal_err);
+
+	// Install exception handlers
+	install_handlers();
+
+	// Enable interrupts
+	enable();
 
 	setvect(5, int_handler_5);
 	puts("generating interrupt 5\n");

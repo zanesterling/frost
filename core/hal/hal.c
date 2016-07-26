@@ -1,4 +1,4 @@
-#include "hal.h"
+#include <hal.h>
 
 #include "idt.h"
 #include "gdt.h"
@@ -12,8 +12,8 @@ int hal_initialize() {
 	err = i86_idt_initialize(0x8);
 	if (err) return err;
 
-	err = i86_pic_initialize();
-	if (err) return err;
+	i86_pic_initialize();
+	i86_pit_initialize();
 
 	return 0;
 }
@@ -21,6 +21,9 @@ int hal_initialize() {
 int hal_shutdown() {
 	return 0;
 }
+
+void enable() { asm("sti\n"); }
+void disable() { asm("cli\n"); }
 
 void geninterrupt(uint8_t n) {
 	asm(
@@ -30,6 +33,16 @@ void geninterrupt(uint8_t n) {
 		"int 0\n"
 		:: "b" (n)
 	);
+}
+
+uint8 inbyte(uint16_t port) {
+	uint8 ret;
+	asm("inb %0, %1" : "=a" (ret) : "d" (port));
+	return ret;
+}
+
+void outbyte(uint16_t port, uint8_t data) {
+	asm("outb %0, %1" : : "d" (port), "a" (data));
 }
 
 void setvect(uint8_t interrupt, void (*vect)()) {

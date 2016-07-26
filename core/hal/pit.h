@@ -1,7 +1,6 @@
 #pragma once
 
-#include "asm.h"
-#include "hal.h"
+#include <hal.h>
 
 #define I86_PIT_OCW_MASK_BINCOUNT 0x1
 #define I86_PIT_OCW_MASK_MODE     0xE
@@ -24,7 +23,7 @@
 #define I86_PIT_OCW_COUNTER_1          0x40
 #define I86_PIT_OCW_COUNTER_2          0x80
 
-int i86_pit_initialize();
+void i86_pit_initialize();
 
 void i86_pit_send_command(uint8_t cmd);
 void i86_pit_send_data(uint16_t data, uint8_t counter);

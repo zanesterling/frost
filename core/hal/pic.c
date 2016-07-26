@@ -3,7 +3,7 @@
 #include "hal.h"
 #include "idt.h"
 
-int i86_pic_initialize() {
+void i86_pic_initialize() {
 	// ICW 1
 	i86_pic_send_command(0x11, 0);
 	i86_pic_send_command(0x11, 1);
@@ -19,8 +19,6 @@ int i86_pic_initialize() {
 	// ICW4
 	i86_pic_send_command(0x1, 0);
 	i86_pic_send_command(0x1, 1);
-
-	return 0;
 }
 
 inline void i86_pic_send_command(uint8_t cmd, uint8_t pic) {

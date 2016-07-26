@@ -14,8 +14,11 @@ endif
 
 BINARIES=stage1.bin stage2.bin kernel.bin
 BIN_FILES = $(addprefix $(BUILD_DIR)/, $(BINARIES))
-LIB_FILES = $(wildcard core/lib/*.c) $(wildcard core/hal/*.c)
-OBJ_FILES = $(addprefix $(BUILD_DIR)/, $(patsubst core/lib/%.c,%.o,$(patsubst core/hal/%.c,hal/%.o,$(LIB_FILES))))
+
+MAIN_FILES = core/kernel/entry.c core/kernel/main.c
+C_FILES = $(wildcard core/lib/*.c) $(wildcard core/hal/*.c) $(filter-out $(MAIN_FILES),$(wildcard core/kernel/*.c))
+OBJ_FILES = $(patsubst core/kernel/%.c,kernel/%.o, $(patsubst core/lib/%.c,%.o, $(patsubst core/hal/%.c,hal/%.o,$(C_FILES))))
+OBJ_FILES := $(addprefix $(BUILD_DIR)/,$(OBJ_FILES))
 
 IMAGE = myfloppy.img
 
@@ -35,6 +38,7 @@ $(IMAGE): build_dir $(BIN_FILES)
 build_dir:
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/hal
+	mkdir -p $(BUILD_DIR)/kernel
 
 $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 	nasm -f bin -i boot/ $+ -o $@
@@ -48,7 +52,10 @@ $(BUILD_DIR)/hal/%.o: core/hal/%.c
 $(BUILD_DIR)/%.o: core/lib/%.c
 	$(CC) $(CFLAGS) -c $+ -o $@
 
-$(BUILD_DIR)/kernel.bin: core/kernel/main.c core/kernel/entry.c $(OBJ_FILES)
+$(BUILD_DIR)/kernel/%.o: core/kernel/%.c
+	$(CC) $(CFLAGS) -c $+ -o $@
+
+$(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(OBJ_FILES)
 	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.elf
 	$(OBJCOPY) -O binary -j .text -j .data -j .rodata $(BUILD_DIR)/kernel.elf $@
 

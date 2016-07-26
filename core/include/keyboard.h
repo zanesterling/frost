@@ -1,7 +1,7 @@
 #pragma once
 
+#include "hal.h"
 #include "stdint.h"
-#include "asm.h"
 
 uint8_t _kbrd_is_enabled;
 
