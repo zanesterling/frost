@@ -70,3 +70,5 @@ void i86_pit_start_counter(uint32_t freq, uint8_t counter, uint8_t mode) {
 void i86_pit_initialize() {
 	setvect(32, i86_pit_irq);
 }
+
+uint32_t i86_get_counter() { return _pit_ticks; }

@@ -54,8 +54,36 @@ void setvect(uint8_t interrupt, void (*vect)()) {
 	);
 }
 
+I86_IRQ_HANDLER getvect(uint8_t interrupt) {
+	struct idt_descriptor desc = i86_get_descriptor(interrupt);
+	return (I86_IRQ_HANDLER)(desc.baseLow + (desc.baseHigh << 16));
+}
+
 inline void interruptdone(uint8_t interrupt) {
 	if (interrupt > 16) return;
 	uint8_t picNum = (interrupt >= 8) ? 1 : 0;
 	i86_pic_send_command(I86_PIC_OCW2_MASK_EOI, picNum);
+}
+
+void sound(uint8_t freq) {
+	outbyte(0x61, 3 | ((uint8_t) freq << 2));
+}
+
+char vendor[32];
+const char* get_cpu_vendor() {
+	asm(
+		"mov eax, 0\n"
+		"cpuid\n"
+		"mov dword [[vendor]], ebx\n"
+		"mov dword [[vendor]+4], ecx\n"
+		"mov dword [[vendor]+8], edx\n"
+		:: [vendor] "X" (vendor)
+		: "eax","ebx","ecx","edx"
+	);
+
+	return vendor;
+}
+
+uint32_t get_tick_count() {
+	return i86_get_counter();
 }

@@ -30,3 +30,4 @@ void i86_pit_send_data(uint16_t data, uint8_t counter);
 uint8_t i86_pit_read_data(uint8_t counter);
 
 void i86_pit_start_counter(uint32_t freq, uint8_t counter, uint8_t mode);
+uint32_t i86_get_counter();

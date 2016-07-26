@@ -28,3 +28,4 @@ struct idt_descriptor {
 
 int i86_install_ir(uint8_t ir_num, uint16_t flags, uint16_t selector, I86_IRQ_HANDLER irq);
 int i86_idt_initialize(uint16_t code_selector);
+struct idt_descriptor i86_get_descriptor(uint8_t ir_num);

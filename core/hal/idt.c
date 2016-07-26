@@ -61,3 +61,7 @@ int i86_idt_initialize(uint16_t code_selector) {
 	idt_install();
 	return 0;
 }
+
+struct idt_descriptor i86_get_descriptor(uint8_t ir_num) {
+	return _idt[ir_num];
+}
