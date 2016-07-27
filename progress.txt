@@ -1,0 +1,20 @@
+Things implemented so far:
+	* dcopy, a command line tool for interacting with FAT images
+	* A two-stage bootloader
+	* Protected mode
+	* C kernel compilation and flattening
+	* A simple output library
+	* Software interrupt handling
+
+In progress:
+	* hardware interrupt handling
+	* keyboard input
+
+To do:
+	* physical memory management
+	* virtual memory enabling and management
+	* simple shell for running commands
+	* multiprocess scheduling
+	* driver for hard drive / floppy
+	* pixel graphics support
+	* GUI
