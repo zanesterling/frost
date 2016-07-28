@@ -22,6 +22,11 @@ int main() {
 	//ShellState state;
 	//runShell(&state);
 
+	for (;;) {
+		move_cursor(0, 14);
+		printf("Current tick count: %d\n", get_tick_count());
+	}
+
 	hal_shutdown();
 	return 0;
 }

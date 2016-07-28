@@ -11,12 +11,14 @@
 #define VID_MEM_MAX (VID_MEM + COLS * ROWS * 2)
 #define CHAR_ATTRIB 15 /* white on black */
 
-unsigned char _CurX, _CurY;
+uint8_t _CurX, _CurY;
 
 void putch(const char c);
 void scroll(const uint8 numRows);
 void puts(const char* str);
 void printf(const char* fmt, ...);
+void move_cursor(uint8_t x, uint8_t y);
+void update_cursor();
 void clearScreen();
 
 void itoa(const int x, char* buf);

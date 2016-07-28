@@ -1,14 +1,6 @@
 #include "io.h"
 
 /* Private stuff */
-static void moveCursor() {
-	unsigned short val = _CurY * COLS + _CurX;
-	outbyte(0x03d4, 0x0f);
-	outbyte(0x03d5, val & 0xff);
-	outbyte(0x03d4, 0x0e);
-	outbyte(0x03d5, (val >> 8) & 0xff);
-}
-
 static const char base_10_chars[10] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 };
@@ -47,7 +39,7 @@ void puts(const char* str) {
 		putch(*str);
 	}
 
-	moveCursor();
+	update_cursor();
 }
 
 void printf(const char* fmt, ...) {
@@ -104,7 +96,20 @@ void clearScreen() {
 
 	_CurX = 0;
 	_CurY = 0;
-	moveCursor();
+	update_cursor();
+}
+
+void move_cursor(uint8_t x, uint8_t y) {
+	_CurX = x;
+	_CurY = y;
+}
+
+void update_cursor() {
+	unsigned short val = _CurY * COLS + _CurX;
+	outbyte(0x03d4, 0x0f);
+	outbyte(0x03d5, val & 0xff);
+	outbyte(0x03d4, 0x0e);
+	outbyte(0x03d5, (val >> 8) & 0xff);
 }
 
 /* UTILITIES */
