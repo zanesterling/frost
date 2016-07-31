@@ -5,16 +5,16 @@ Things implemented so far:
 	* C kernel compilation and flattening
 	* A simple output library
 	* Software interrupt handling
+	* Hardware interrupt handling
 
 In progress:
-	* hardware interrupt handling
-	* keyboard input
+	* Physical memory management
+	* Keyboard input
 
 To do:
-	* physical memory management
-	* virtual memory enabling and management
-	* simple shell for running commands
-	* multiprocess scheduling
-	* driver for hard drive / floppy
-	* pixel graphics support
+	* Virtual memory enabling and management
+	* Simple shell for running commands / programs
+	* Multiprocess scheduling
+	* Driver for hard drive / floppy
+	* Pixel graphics support
 	* GUI
