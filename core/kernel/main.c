@@ -19,11 +19,8 @@ int main() {
 	geninterrupt(5);
 	puts("done interrupting\n");
 
-	//ShellState state;
-	//runShell(&state);
-
 	for (;;) {
-		move_cursor(0, 14);
+		move_cursor(0, ROWS - 1);
 		printf("Current tick count: %d\n", get_tick_count());
 	}
 
