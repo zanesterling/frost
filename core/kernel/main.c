@@ -19,9 +19,15 @@ int main() {
 	geninterrupt(5);
 	puts("done interrupting\n");
 
+	struct cursor_loc cursor = get_cursor_loc();
+	move_cursor(0, 14);
+	puts("Current tick count: ");
+	move_cursor(cursor.x, cursor.y);
 	for (;;) {
-		move_cursor(0, ROWS - 1);
-		printf("Current tick count: %d\n", get_tick_count());
+		cursor = get_cursor_loc();
+		move_cursor(20, 14);
+		printf("%d\n", get_tick_count());
+		move_cursor(cursor.x, cursor.y);
 	}
 
 	hal_shutdown();

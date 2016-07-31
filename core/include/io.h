@@ -13,11 +13,16 @@
 
 uint8_t _CurX, _CurY;
 
+struct cursor_loc {
+	uint8_t x, y;
+};
+
 void putch(const char c);
 void scroll(const uint8 numRows);
 void puts(const char* str);
 void printf(const char* fmt, ...);
 void move_cursor(uint8_t x, uint8_t y);
+struct cursor_loc get_cursor_loc();
 void update_cursor();
 void clearScreen();
 

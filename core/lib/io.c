@@ -104,6 +104,11 @@ void move_cursor(uint8_t x, uint8_t y) {
 	_CurY = y;
 }
 
+struct cursor_loc get_cursor_loc() {
+	struct cursor_loc ret = {_CurX, _CurY};
+	return ret;
+}
+
 void update_cursor() {
 	unsigned short val = _CurY * COLS + _CurX;
 	outbyte(0x03d4, 0x0f);
