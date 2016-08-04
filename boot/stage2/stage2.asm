@@ -27,6 +27,7 @@ jmp main    ; jump to main
 %include "stage2/Fat12.inc" ; fat12 driver
 %include "stage2/Floppy16.inc" ; floppy driver
 %include "stage2/common.inc" ; common definitions
+%include "stage2/bootinfo.inc"
 
 
 ;*************************************************;
@@ -36,10 +37,38 @@ jmp main    ; jump to main
 LoadingMsg db "Preparing to load operating system...",13,10,0
 MsgFailure db 0x0d, 0x0a, "ERROR: file kernel.sys not found. Press any key to reboot.", 0x0d, 0x0a, 0
 
+boot_info:
+istruc multiboot_info
+	at multiboot_info.flags,			dd 0
+	at multiboot_info.memoryLo,			dd 0
+	at multiboot_info.memoryHi,			dd 0
+	at multiboot_info.bootDevice,		dd 0
+	at multiboot_info.cmdLine,			dd 0
+	at multiboot_info.mods_count,		dd 0
+	at multiboot_info.mods_addr,		dd 0
+	at multiboot_info.syms0,			dd 0
+	at multiboot_info.syms1,			dd 0
+	at multiboot_info.syms2,			dd 0
+	at multiboot_info.mmap_length,		dd 0
+	at multiboot_info.mmap_addr,		dd 0
+	at multiboot_info.drives_length,	dd 0
+	at multiboot_info.drives_addr,		dd 0
+	at multiboot_info.config_table,		dd 0
+	at multiboot_info.bootloader_name,	dd 0
+	at multiboot_info.apm_table,		dd 0
+	at multiboot_info.vbe_control_info,	dd 0
+	at multiboot_info.vbe_mode_info,	dw 0
+	at multiboot_info.vbe_interface_seg,dw 0
+	at multiboot_info.vbe_interface_off,dw 0
+	at multiboot_info.vbe_interface_len,dw 0
+iend
+
 
 ;*************************************************;
 ;   Second Stage Loader Entry Point
 ;************************************************;
+
+section .text
 
 main:
 
@@ -153,7 +182,14 @@ Stage3:
     ;   Execute kernel
     ;********************************;
 
-    jmp CODE_DESC:IMAGE_PMODE_BASE
+    cli
+    mov eax, 0x2BADB002
+    mov ebx, 0
+    mov edx, dword [ImageSize]
+
+    push dword boot_info
+    call CODE_DESC:IMAGE_PMODE_BASE
+    ;jmp CODE_DESC:IMAGE_PMODE_BASE
 
     STOP:
         cli
