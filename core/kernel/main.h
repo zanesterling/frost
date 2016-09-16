@@ -10,4 +10,4 @@
 int init();
 
 void get_cmd(char* cmd_buf, size_t buflen);
-int run_cmd(char* cmd_buf);
+void run_cmd(char* cmd_buf);

@@ -1,5 +1,7 @@
 #include "main.h"
 
+bool running;
+
 int main() {
 	puts("Hello, world of kernels\n\n");
 	int init_err = init();
@@ -7,10 +9,10 @@ int main() {
 
 	// fetch and run commands
 	char cmd_buf[128];
-	while (1) {
+	running = true;
+	while (running) {
 		get_cmd(cmd_buf, 126);
-		puts(cmd_buf);
-		putch('\n');
+		run_cmd(cmd_buf);
 	}
 
 	puts("\nThanks for using FrOSt\n");
@@ -72,4 +74,17 @@ void get_cmd(char* cmd_buf, size_t buflen) {
 	}
 
 	cmd_buf[i] = '\0';
+}
+
+void run_cmd(char* cmd) {
+	if (strcmp(cmd, "exit") == 0) {
+		running = false;
+	} else if (strcmp(cmd, "help") == 0) {
+		puts(
+			"help: lists runnable commands\n"
+			"exit: exits FrOSt\n"
+		);
+	} else {
+		printf("command %s not recognized\n", cmd);
+	}
 }

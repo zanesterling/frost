@@ -2,7 +2,6 @@
 
 #include "bool.h"
 #include "hal.h"
-#include "io.h"
 #include "irq.h"
 #include "stdint.h"
 
