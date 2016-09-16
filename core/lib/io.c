@@ -25,6 +25,7 @@ void putch(const char c) {
 		_CurX = 0;
 		++_CurY;
 	}
+	update_cursor();
 }
 
 void scroll(const uint8 numRows) {
