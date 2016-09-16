@@ -4,8 +4,8 @@
 
 int         hal_initialize();
 int         hal_shutdown();
-void        enable();
-void        disable();
+void        enable_interrupts();
+void        disable_interrupts();
 void        geninterrupt(uint8_t n);
 uint8_t     inbyte(uint16_t port);
 void        outbyte(uint16_t port, uint8_t data);

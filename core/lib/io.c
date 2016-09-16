@@ -148,7 +148,10 @@ void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
 /* INPUT */
 
 char getch() {
-	return scancodes[getScancode() + 1];
+	KEYCODE key = KEY_UNKNOWN;
+	while (key == KEY_UNKNOWN) key = kbrd_get_last_key();
+	kbrd_discard_last_key();
+	return kbrd_key_to_ascii(key);
 }
 
 uint8 getScancode() {

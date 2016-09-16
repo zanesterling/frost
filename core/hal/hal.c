@@ -25,8 +25,8 @@ int hal_shutdown() {
 	return 0;
 }
 
-void enable() { asm("sti\n"); }
-void disable() { asm("cli\n"); }
+void enable_interrupts() { asm("sti\n"); }
+void disable_interrupts() { asm("cli\n"); }
 
 void geninterrupt(uint8_t n) {
 	asm(

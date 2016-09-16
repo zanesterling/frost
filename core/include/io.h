@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hal.h"
+#include "keyboard.h"
 #include "scancodes.h"
 #include "stdarg.h"
 #include "string.h"
