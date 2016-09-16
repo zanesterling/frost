@@ -344,7 +344,7 @@ char kbrd_key_to_ascii(KEYCODE code) {
 	uint8_t key = code;
 
 	if (key <= 0x7f) { // if isascii
-		if (_shift || _capslock) {
+		if (_shift != _capslock) {
 			if ('a' <= key && key <= 'z') {
 				key -= 0x20;
 			}
