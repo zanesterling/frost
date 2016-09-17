@@ -89,7 +89,7 @@ void printf(const char* fmt, ...) {
 	}
 }
 
-void clearScreen() {
+void clear_screen() {
 	uint16_t* p = (uint16_t*) VID_MEM;
 	for (size_t i = 0; i < COLS * ROWS; i++) {
 		*p++ = 0;

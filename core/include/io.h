@@ -25,7 +25,7 @@ void printf(const char* fmt, ...);
 void move_cursor(uint8_t x, uint8_t y);
 struct cursor_loc get_cursor_loc();
 void update_cursor();
-void clearScreen();
+void clear_screen();
 
 void itoa(const int x, char* buf);
 void itoa_s(const int x, char* buf, const size_t base, const char* base_chars);
