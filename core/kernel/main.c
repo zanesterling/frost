@@ -1,6 +1,6 @@
 #include "main.h"
 
-int main() {
+int kernel_main(multiboot_info* info) {
 	puts("Hello, world of kernels\n\n");
 	int init_err = init();
 	if (init_err) {
@@ -8,6 +8,7 @@ int main() {
 		for (;;);
 	}
 
+	memory_summary(info);
 	run_shell();
 
 	puts("\nThanks for using FrOSt\n");
@@ -26,3 +27,9 @@ int init() {
 	return 0;
 }
 
+void memory_summary(multiboot_info* bootinfo) {
+	printf("bootinfo*: 0x%x\n", bootinfo);
+	printf("hi:0x%x\nlo:0x%x\n", bootinfo->memoryHi, bootinfo->memoryLo);
+	uint64_t memory_size = 1024 + bootinfo->memoryLo + bootinfo->memoryHi * 64;
+	printf("Memory size: 0x%d KB\n", memory_size);
+}

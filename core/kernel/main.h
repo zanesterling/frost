@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bootinfo.h>
 #include <hal.h>
 #include <io.h>
 #include <keyboard.h>
@@ -9,5 +10,4 @@
 
 int init();
 
-void get_cmd(char* cmd_buf, size_t buflen);
-void run_cmd(char* cmd_buf);
+void memory_summary(multiboot_info* bootinfo);

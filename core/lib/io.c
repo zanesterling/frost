@@ -14,16 +14,25 @@ void putch(const char c) {
 		scroll(1);
 	}
 
-	if (c != '\n') {
+	if (c == '\n') {
+		for (; _CurX < COLS; _CurX++) {
+			uint8_t* p = (uint8_t*)VID_MEM + 2 * (_CurY * COLS + _CurX);
+			*p = ' ';
+			*++p = CHAR_ATTRIB;
+		}
+
+		_CurX = 0;
+		++_CurY;
+	} else {
 		unsigned char* p = (unsigned char*)VID_MEM;
 		p += 2 * (_CurY * COLS + _CurX++);
 		*p++ = c;
 		*p = CHAR_ATTRIB;
-	}
 
-	if (c == '\n' || _CurX == COLS) {
-		_CurX = 0;
-		++_CurY;
+		if (_CurX >= COLS) {
+			_CurX = 0;
+			++_CurY;
+		}
 	}
 	update_cursor();
 }
@@ -127,7 +136,7 @@ void itoa(int x, char* buf) {
 void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
-		buf[1] = 0;
+		buf[1] = '\0';
 		return;
 	}
 
@@ -143,7 +152,7 @@ void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
 		buf[i] = buf[len-1 - i];
 		buf[len-1 - i] = tmp;
 	}
-	buf[len] = 0;
+	buf[len] = '\0';
 }
 
 /* INPUT */

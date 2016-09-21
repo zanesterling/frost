@@ -22,17 +22,19 @@ jmp main    ; jump to main
 ;*************************************************;
 
 %include "util/stdio.inc" ; basic io routines
-%include "stage2/gdt.inc" ; global descriptor table stuff
 %include "stage2/A20.inc" ; helper functions for enabling the A20 line
+%include "stage2/bootinfo.inc"
+%include "stage2/common.inc" ; common definitions
 %include "stage2/Fat12.inc" ; fat12 driver
 %include "stage2/Floppy16.inc" ; floppy driver
-%include "stage2/common.inc" ; common definitions
-%include "stage2/bootinfo.inc"
+%include "stage2/gdt.inc" ; global descriptor table stuff
+%include "stage2/memory.inc" ; memory query functions
 
 
 ;*************************************************;
 ;   Data segment
 ;*************************************************;
+section .data
 
 LoadingMsg db "Preparing to load operating system...",13,10,0
 MsgFailure db 0x0d, 0x0a, "ERROR: file kernel.sys not found. Press any key to reboot.", 0x0d, 0x0a, 0
@@ -63,6 +65,7 @@ istruc multiboot_info
 	at multiboot_info.vbe_interface_len,dw 0
 iend
 
+memory_map: resb MemoryMapEntry.size * 8
 
 ;*************************************************;
 ;   Second Stage Loader Entry Point
@@ -84,6 +87,8 @@ main:
         mov sp, 0xffff
         sti
 
+        mov [boot_info+multiboot_info.bootDevice], dl
+
     ;********************************;
     ;   Print loading message
     ;********************************;
@@ -99,6 +104,20 @@ main:
     ;   Enable A20 line
     ;********************************;
         call EnableA20_KKbrd_Out
+
+    ;********************************;
+    ;   Get memory information
+    ;********************************;
+        mov dword [boot_info+multiboot_info.flags], 0xff
+
+        xor eax, eax
+        xor ebx, ebx
+        call BiosGetBigMemorySize
+        mov word [boot_info+multiboot_info.memoryLo], ax
+        mov word [boot_info+multiboot_info.memoryHi], bx
+
+        mov di, memory_map
+        mov dword [boot_info+multiboot_info.mmap_addr], memory_map
 
     ;********************************;
     ;   Initialize filesystem
@@ -188,8 +207,8 @@ Stage3:
     mov edx, dword [ImageSize]
 
     push dword boot_info
-    call CODE_DESC:IMAGE_PMODE_BASE
-    ;jmp CODE_DESC:IMAGE_PMODE_BASE
+    push dword STOP; junk return address
+    jmp CODE_DESC:IMAGE_PMODE_BASE
 
     STOP:
         cli

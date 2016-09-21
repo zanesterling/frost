@@ -8,9 +8,11 @@
 #error Only x86 is supported.
 #endif
 
-extern void main();
+#include <bootinfo.h>
 
-void kernel_entry() {
+extern int kernel_main(multiboot_info* info);
+
+void kernel_entry(multiboot_info* bootinfo) {
 	asm(
 		/* set data segments to data selector */
 		"mov %ax, 0x10\n"
@@ -18,13 +20,9 @@ void kernel_entry() {
 		"mov %es, %ax\n"
 		"mov %fs, %ax\n"
 		"mov %gs, %ax\n"
-		"mov %ss, %ax\n"
-		"mov %esp, 0x90000\n" /* stack begins from 90000h */
-		"mov %ebp, %esp\n"
-		"push %ebp\n"
 	);
 
-	main();
+	kernel_main(bootinfo);
 
 	/* stall to avoid returning to nowhere */
 	for (;;);

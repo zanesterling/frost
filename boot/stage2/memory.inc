@@ -86,11 +86,12 @@ BiosGetBigMemorySize:
 ;   in:es:di -> entry destination buffer
 ;*******************************************
 
-struc MemoryMapEntry:
+struc MemoryMapEntry
     .baseAddress resq 1 ; base address of range
     .length      resq 1 ; length of range in bytes
     .type        resd 1 ; type of range
     .acpi_null   resd 1 ; reserved
+    .size:
 endstruc
 
 BiosGetMemoryMap:
@@ -136,7 +137,7 @@ BiosGetMemoryMap:
 
 .error:
     stc
-.done
+.done:
     popad
     ret
 

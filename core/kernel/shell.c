@@ -11,8 +11,6 @@ void run_cmd(char* cmd);
 // PUBLIC FUNCTION IMPLEMENTATIONS
 
 void run_shell() {
-	clear_screen();
-
 	// fetch and run commands
 	char cmd_buf[128];
 	_running = true;
