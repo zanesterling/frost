@@ -6,6 +6,7 @@ bool _running;
 
 void get_cmd(char* cmd_buf, size_t buflen);
 void run_cmd(char* cmd);
+void physical_memory_summary();
 
 
 // PUBLIC FUNCTION IMPLEMENTATIONS
@@ -28,7 +29,7 @@ void get_cmd(char* cmd_buf, size_t buflen) {
 
 	size_t i = 0;
 	KEYCODE key = KEY_UNKNOWN;
-	while (i < buflen) {
+	while (i < buflen - 1) {
 		key = getch();
 
 		if (key == KEY_RETURN) {
@@ -64,14 +65,23 @@ void get_cmd(char* cmd_buf, size_t buflen) {
 }
 
 void run_cmd(char* cmd) {
-	if (strcmp(cmd, "exit") == 0) {
-		_running = false;
-	} else if (strcmp(cmd, "help") == 0) {
+	if (strcmp(cmd, "help") == 0) {
 		puts(
 			"help: lists runnable commands\n"
+			"pmem: shows a summary of phyiscal memory\n"
 			"exit: exits FrOSt\n"
 		);
+	} else if (strcmp(cmd, "pmem") == 0) {
+		physical_memory_summary();
+	} else if (strcmp(cmd, "exit") == 0) {
+		_running = false;
 	} else {
-		printf("command %s not recognized\n", cmd);
+		printf("command '%s' not recognized\n", cmd);
 	}
+}
+
+void physical_memory_summary() {
+	multiboot_info* bootinfo = get_bootinfo();
+	uint64_t memory_size = 1024 + bootinfo->memoryLo + 64 * bootinfo->memoryHi;
+	printf("Memory size: %d KB (0x%x KB)\n", memory_size, memory_size);
 }

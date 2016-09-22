@@ -5,7 +5,10 @@
 #include "pic.h"
 #include "pit.h"
 
-int hal_initialize() {
+multiboot_info* _bootinfo = 0;
+multiboot_info* get_bootinfo() { return _bootinfo; }
+
+int hal_initialize(multiboot_info* bootinfo) {
 	int err = i86_gdt_initialize();
 	if (err) return err;
 
@@ -17,6 +20,8 @@ int hal_initialize() {
 	i86_pit_start_counter(
 		100, I86_PIT_OCW_COUNTER_0, I86_PIT_OCW_MODE_SQUAREWAVEGEN
 	);
+
+	_bootinfo = bootinfo;
 
 	return 0;
 }

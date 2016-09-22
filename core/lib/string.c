@@ -7,11 +7,12 @@ size_t strlen(const char* str) {
 }
 
 int strcmp(const char* s1, const char* s2) {
-	char c1, c2;
-	while ((c1 = *s1++) && (c2 = *s2++)) {
-		if (c1 != c2) {
-			return c1 - c2;
+	while (*s1 && *s2) {
+		if (*s1 != *s2) {
+			return *s1 - *s2;
 		}
+		s1++;
+		s2++;
 	}
 
 	if (*s1) return 1;
