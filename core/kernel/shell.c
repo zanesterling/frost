@@ -93,10 +93,10 @@ void physical_memory_summary() {
 		mmap_entry entry = ((mmap_entry*) bootinfo->mmap_addr)[i];
 
 		printf(
-			"  0x%x - 0x%x: 0x%x\n",//%s",
+			"  0x%llx - 0x%llx: %s\n",//%s",
 			entry.base_address,
-			/*entry->base_address +*/ entry.length,
-			entry.type//TYPE_STRING(entry->type)
+			entry.base_address + entry.length,
+			TYPE_STRING(entry.type)
 		);
 	}
 }

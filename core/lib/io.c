@@ -66,33 +66,55 @@ void printf(const char* fmt, ...) {
 			continue;
 		}
 
-		switch (*++p) {
-			case 'c':
-				x = va_arg(argp, uint8_t);
-				putch(x);
-				break;
+		uint8_t length = 2;
 
-			case 'd':
-			case 'i':
-				x = va_arg(argp, int);
-				itoa(x, buf);
-				puts(buf);
-				break;
+		uint8_t done = 0;
+		while (!done) {
+			switch (*++p) {
+				case 'l':
+					length++;
+					break;
 
-			case 'x':
-				x = va_arg(argp, int);
-				itoa_s(x, buf, 16, hex_chars);
-				puts(buf);
-				break;
+				case 'c':
+					x = va_arg(argp, int);
+					putch(x);
+					done = 1;
+					break;
 
-			case 's':
-				str = va_arg(argp, char*);
-				while (*str) putch(*str++);
-				break;
+				case 'd':
+				case 'i':
+					if (length == 0) x = va_arg(argp, char);
+					else if (length == 1) x = va_arg(argp, short);
+					else if (length == 2) x = va_arg(argp, int);
+					else if (length == 3) x = va_arg(argp, long);
+					else if (length == 4) x = va_arg(argp, long long);
+					itoa(x, buf);
+					puts(buf);
+					done = 1;
+					break;
 
-			case '%':
-				putch('%');
-				break;
+				case 'x':
+					if (length == 0) x = va_arg(argp, char);
+					else if (length == 1) x = va_arg(argp, short);
+					else if (length == 2) x = va_arg(argp, int);
+					else if (length == 3) x = va_arg(argp, long);
+					else if (length == 4) x = va_arg(argp, long long);
+					itoa_s(x, buf, 16, hex_chars);
+					puts(buf);
+					done = 1;
+					break;
+
+				case 's':
+					str = va_arg(argp, char*);
+					while (*str) putch(*str++);
+					done = 1;
+					break;
+
+				case '%':
+					putch('%');
+					done = 1;
+					break;
+			}
 		}
 	}
 }
