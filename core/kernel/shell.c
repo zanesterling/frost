@@ -15,6 +15,7 @@ void run_shell() {
 	// fetch and run commands
 	char cmd_buf[128];
 	_running = true;
+	physical_memory_summary();
 	while (_running) {
 		get_cmd(cmd_buf, 126);
 		run_cmd(cmd_buf);
@@ -82,6 +83,20 @@ void run_cmd(char* cmd) {
 
 void physical_memory_summary() {
 	multiboot_info* bootinfo = get_bootinfo();
-	uint64_t memory_size = 1024 + bootinfo->memoryLo + 64 * bootinfo->memoryHi;
+
+	uint64_t memory_size = 1024 + bootinfo->memoryLo
+		+ 64 * bootinfo->memoryHi;
 	printf("Memory size: %d KB (0x%x KB)\n", memory_size, memory_size);
+
+	printf("Memory map: (%d elements)\n", bootinfo->mmap_length);
+	for (uint32_t i = 0; i < bootinfo->mmap_length; i++) {
+		mmap_entry entry = ((mmap_entry*) bootinfo->mmap_addr)[i];
+
+		printf(
+			"  0x%x - 0x%x: 0x%x\n",//%s",
+			entry.base_address,
+			/*entry->base_address +*/ entry.length,
+			entry.type//TYPE_STRING(entry->type)
+		);
+	}
 }

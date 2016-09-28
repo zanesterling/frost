@@ -65,7 +65,7 @@ istruc multiboot_info
 	at multiboot_info.vbe_interface_len,dw 0
 iend
 
-memory_map: resb MemoryMapEntry.size * 8
+memory_map: resb MemoryMapEntry.size * 32
 
 ;*************************************************;
 ;   Second Stage Loader Entry Point
@@ -118,6 +118,9 @@ main:
 
         mov di, memory_map
         mov dword [boot_info+multiboot_info.mmap_addr], memory_map
+        call BiosGetMemoryMap
+        mov bx, [mmap_length]
+        mov word [boot_info+multiboot_info.mmap_length], bx
 
     ;********************************;
     ;   Initialize filesystem

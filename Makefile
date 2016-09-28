@@ -21,6 +21,9 @@ endif
 BINARIES=stage1.bin stage2.bin kernel.bin
 BIN_FILES = $(addprefix $(BUILD_DIR)/, $(BINARIES))
 
+STAGE1_FILES = $(wildcard boot/stage1/*.asm) $(wildcard boot/stage1/*.inc)
+STAGE2_FILES = $(wildcard boot/stage2/*.asm) $(wildcard boot/stage2/*.inc)
+
 MAIN_FILES = core/kernel/entry.c core/kernel/main.c
 C_FILES = $(wildcard core/lib/*.c) $(wildcard core/hal/*.c) $(filter-out $(MAIN_FILES),$(wildcard core/kernel/*.c))
 OBJ_FILES = $(patsubst core/kernel/%.c,kernel/%.o, $(patsubst core/lib/%.c,%.o, $(patsubst core/hal/%.c,hal/%.o,$(C_FILES))))
@@ -49,8 +52,8 @@ build_dir:
 $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 	nasm -f bin -i boot/ $+ -o $@
 
-$(BUILD_DIR)/stage2.bin: boot/stage2/stage2.asm
-	nasm -f bin -i boot/ $+ -o $@
+$(BUILD_DIR)/stage2.bin: $(STAGE2_FILES)
+	nasm -f bin -i boot/ boot/stage2/stage2.asm -o $@
 
 $(BUILD_DIR)/hal/%.o: core/hal/%.c
 	$(CC) $(CFLAGS) -c $+ -o $@

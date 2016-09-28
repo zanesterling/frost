@@ -18,6 +18,8 @@ bits	16
 %define FAT_SEG 0x2c0
 %define ROOT_SEG 0x2e0
 
+section .text
+
 ;*******************************************
 ; LoadRoot ()
 ;	- Load Root Directory Table to 0x7e00

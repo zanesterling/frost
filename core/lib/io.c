@@ -60,7 +60,6 @@ void printf(const char* fmt, ...) {
 	va_list argp;
 	va_start(argp, fmt);
 
-
 	for (p = fmt; *p; p++) {
 		if (*p != '%') {
 			putch(*p);
@@ -69,7 +68,7 @@ void printf(const char* fmt, ...) {
 
 		switch (*++p) {
 			case 'c':
-				x = va_arg(argp, int);
+				x = va_arg(argp, uint8_t);
 				putch(x);
 				break;
 

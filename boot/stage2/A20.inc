@@ -9,6 +9,7 @@
 %define __A20_INC_67343546FDCC56AAB872_INCLUDED__
 
 bits	16
+section .text
 
 ;----------------------------------------------
 ; Enables a20 line through keyboard controller

@@ -12,6 +12,8 @@
 
 bits	16
 
+section .data
+
 bpbOEM			db "My OS   "
 bpbBytesPerSector:  	DW 512
 bpbSectorsPerCluster: 	DB 1
@@ -38,6 +40,8 @@ cluster     dw 0x0000
 absoluteSector db 0x00
 absoluteHead   db 0x00
 absoluteTrack  db 0x00
+
+section .text
 
 ;************************************************;
 ; Convert CHS to LBA

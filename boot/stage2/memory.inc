@@ -2,6 +2,7 @@
 %define __MEMORY_INC_INCLUDED__
 
 bits 16
+section .text
 
 ;*******************************************
 ; BiosGetMemorySize()
@@ -84,6 +85,7 @@ BiosGetBigMemorySize:
 ;*******************************************
 ; BiosGetMemoryMap
 ;   in:es:di -> entry destination buffer
+;   ret:bx: number of entries
 ;*******************************************
 
 struc MemoryMapEntry
@@ -107,7 +109,7 @@ BiosGetMemoryMap:
     cmp  eax, 0x534d4150
     jne  .error
     test ebx, ebx
-    je   .error
+    jz   .error
     jmp  .start
 
 .next_entry:
@@ -138,7 +140,12 @@ BiosGetMemoryMap:
 .error:
     stc
 .done:
+    mov word [mmap_length], bp
     popad
     ret
+
+section .data
+mmap_length dw 0
+section .text
 
 %endif ;__MEMORY_INC_INCLUDED__

@@ -15,6 +15,7 @@
 ;************************************************;
 
 bits    16
+section .text
 
 Puts16:
         pusha               ; save registers

@@ -26,3 +26,23 @@ typedef struct multiboot_info {
     uint16_t vbe_interface_off;
     uint16_t vbe_interface_len;
 } multiboot_info;
+
+typedef struct mmap_entry {
+	uint64_t base_address;
+	uint64_t length;
+	uint32_t type;
+	uint32_t acpi_null; // reserved
+} mmap_entry;
+
+enum MMAP_ENTRY_TYPE {
+	MMAP_TYPE_AVAILABLE    = 1,
+	MMAP_TYPE_RESERVED     = 2,
+	MMAP_TYPE_ACPI_RECLAIM = 3,
+	MMAP_TYPE_ACPI_NVS     = 4,
+};
+
+#define TYPE_STRING(type) ( \
+	type == MMAP_TYPE_AVAILABLE    ? "available"    : \
+	(type == MMAP_TYPE_RESERVED     ? "reserved"     : \
+	(type == MMAP_TYPE_ACPI_RECLAIM ? "acpi reclaim" : \
+	(type == MMAP_TYPE_ACPI_NVS     ? "acpi nvs"     : "bad type"))))
