@@ -15,7 +15,6 @@ void run_shell() {
 	// fetch and run commands
 	char cmd_buf[128];
 	_running = true;
-	physical_memory_summary();
 	while (_running) {
 		get_cmd(cmd_buf, 126);
 		run_cmd(cmd_buf);
@@ -68,10 +67,13 @@ void get_cmd(char* cmd_buf, size_t buflen) {
 void run_cmd(char* cmd) {
 	if (strcmp(cmd, "help") == 0) {
 		puts(
-			"help: lists runnable commands\n"
-			"pmem: shows a summary of phyiscal memory\n"
-			"exit: exits FrOSt\n"
+			"help: list runnable commands\n"
+			"clear: blank the display\n"
+			"pmem: show a summary of phyiscal memory\n"
+			"exit: exit FrOSt\n"
 		);
+	} else if (strcmp(cmd, "clear") == 0) {
+		clear_screen();
 	} else if (strcmp(cmd, "pmem") == 0) {
 		physical_memory_summary();
 	} else if (strcmp(cmd, "exit") == 0) {

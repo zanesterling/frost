@@ -5,12 +5,11 @@ int kernel_main(multiboot_info* info) {
 	int init_err = init(info);
 	if (init_err) {
 		printf("init_err: %x\n", init_err);
-		for (;;);
+	} else {
+		run_shell();
+		puts("\nThanks for using FrOSt\n");
 	}
 
-	run_shell();
-
-	puts("\nThanks for using FrOSt\n");
 	asm(
 		"cli\n"
 		"hlt\n"
