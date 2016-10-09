@@ -5,7 +5,7 @@ OBJCOPY=objcopy
 CFLAGS = -g -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
 BUILD_DIR=build
-QEMU=
+QEMU = qemu-system-i386
 
 ifeq ($(shell uname -s),Darwin)
 	CMD_PREFIX=/usr/local/i386-elf-gcc/bin/i386-elf-
@@ -34,10 +34,10 @@ IMAGE = myfloppy.img
 all: $(IMAGE)
 
 run: $(IMAGE)
-	qemu-system-i386 -fda $(IMAGE) $(QEMU_FLAGS)
+	$(QEMU) -fda $(IMAGE) $(QEMU_FLAGS)
 
 run-debug: $(IMAGE)
-	qemu-system-i386 -fda $(IMAGE) $(QEMU_FLAGS) -s -S
+	$(QEMU) -fda $(IMAGE) $(QEMU_FLAGS) -s -S
 
 $(IMAGE): build_dir $(BIN_FILES)
 	cat $(BUILD_DIR)/stage1.bin /dev/zero | dd of=$(IMAGE) bs=1024 count=1440
