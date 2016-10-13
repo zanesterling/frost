@@ -28,28 +28,28 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 
 	// all memory is in use by default
 	memset(_memory_map, 0xf, _max_blocks * PMEM_BLOCK_SIZE);
-    _used_blocks = _max_blocks;
+	_used_blocks = _max_blocks;
 
-    struct mmap_entry* entry = memory_map.addr;
-    for (uint32_t i = 0; i < memory_map.len; i++) {
-        if (
-            entry->type == MMAP_TYPE_AVAILABLE
-            && entry->length > PMEM_BLOCK_SIZE
-        ) {
-            uint64_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
-                / PMEM_BLOCK_SIZE;
-            void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
+	struct mmap_entry* entry = memory_map.addr;
+	for (uint32_t i = 0; i < memory_map.len; i++) {
+		if (
+			entry->type == MMAP_TYPE_AVAILABLE
+			&& entry->length > PMEM_BLOCK_SIZE
+		) {
+			uint64_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
+				/ PMEM_BLOCK_SIZE;
+			void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
 
-            // account for start shifting
-            uint32_t shift = PMEM_BLOCK_SIZE
-                - (entry->base_address % PMEM_BLOCK_SIZE);
-            uint32_t num_blocks = (entry->length - shift) / PMEM_BLOCK_SIZE;
+			// account for start shifting
+			uint32_t shift = PMEM_BLOCK_SIZE
+				- (entry->base_address % PMEM_BLOCK_SIZE);
+			uint32_t num_blocks = (entry->length - shift) / PMEM_BLOCK_SIZE;
 
-            pmem_free_blocks(start_pointer, num_blocks);
-        }
+			pmem_free_blocks(start_pointer, num_blocks);
+		}
 
-        entry++;
-    }
+		entry++;
+	}
 }
 
 void pmem_init_region(void* base, int64_t size) {
@@ -69,19 +69,19 @@ void pmem_deinit_region(void* base, int64_t size) {
 }
 
 void* pmem_alloc_block() {
-    int64_t block = _get_first_free_block();
-    if (block < 0) return NULL;
+	int64_t block = _get_first_free_block();
+	if (block < 0) return NULL;
 
-    _used_blocks++;
-    return (void*) ((uint32_t)block * PMEM_BLOCK_SIZE);
+	_used_blocks++;
+	return (void*) ((uint32_t)block * PMEM_BLOCK_SIZE);
 }
 
 void* pmem_alloc_blocks(uint32_t num_blocks) {
-    int64_t start = _get_first_free_blocks(num_blocks);
-    if (start < 0) return NULL;
+	int64_t start = _get_first_free_blocks(num_blocks);
+	if (start < 0) return NULL;
 
-    _used_blocks += num_blocks;
-    return (void*) ((uint32_t)start * PMEM_BLOCK_SIZE);
+	_used_blocks += num_blocks;
+	return (void*) ((uint32_t)start * PMEM_BLOCK_SIZE);
 }
 
 void pmem_free_block(void* block) {
@@ -90,11 +90,16 @@ void pmem_free_block(void* block) {
 }
 
 void pmem_free_blocks(void* block, uint32_t num_blocks) {
-    int64_t cur_block = ((int64_t) (uint32_t) block) >> BLOCK_SIZE_BITS;
-    _used_blocks -= num_blocks;
-    while (num_blocks--) {
-        _unset_bit(cur_block);
-        cur_block += 1;
+	int64_t cur_block = ((int64_t) (uint32_t) block) >> BLOCK_SIZE_BITS;
+	_used_blocks -= num_blocks;
+	while (num_blocks--) {
+		_unset_bit(cur_block);
+		cur_block += 1;
+	}
+}
+
+void pmem_print_summary() {
+    for (uint32_t block = 0; block < _max_blocks; block++) {
     }
 }
 
@@ -108,7 +113,7 @@ void _set_block(void* p, uint8_t on) {
 }
 
 int64_t _get_first_free_block() {
-    if (_used_blocks == _max_blocks) return -1;
+	if (_used_blocks == _max_blocks) return -1;
 
 	for (int64_t i = 0; i < _max_blocks; i += 8) {
 		// check for full byte
@@ -121,23 +126,23 @@ int64_t _get_first_free_block() {
 		}
 	}
 
-    return -1;
+	return -1;
 }
 
 int64_t _get_first_free_blocks(uint32_t num_blocks) {
-    if (_max_blocks - _used_blocks < num_blocks) return -1;
+	if (_max_blocks - _used_blocks < num_blocks) return -1;
 
-    for (int64_t i = 0; i < _max_blocks; i++) {
-        int found = 1;
-        for (uint32_t j = 0; j < num_blocks; j++) {
-            if (_test_bit(i + j)) {
-                found = 0;
-                break;
-            }
-        }
+	for (int64_t i = 0; i < _max_blocks; i++) {
+		int found = 1;
+		for (uint32_t j = 0; j < num_blocks; j++) {
+			if (_test_bit(i + j)) {
+				found = 0;
+				break;
+			}
+		}
 
-        if (found) return i;
-    }
+		if (found) return i;
+	}
 
-    return -1;
+	return -1;
 }

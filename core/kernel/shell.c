@@ -6,7 +6,7 @@ bool _running;
 
 void get_cmd(char* cmd_buf, size_t buflen);
 void run_cmd(char* cmd);
-void physical_memory_summary();
+void mmap_summary();
 
 
 // PUBLIC FUNCTION IMPLEMENTATIONS
@@ -69,13 +69,15 @@ void run_cmd(char* cmd) {
 		puts(
 			"help: list runnable commands\n"
 			"clear: blank the display\n"
-			"pmem: show a summary of phyiscal memory\n"
+			"mmap: show the BIOS memory map\n"
 			"exit: exit FrOSt\n"
 		);
 	} else if (strcmp(cmd, "clear") == 0) {
 		clear_screen();
+	} else if (strcmp(cmd, "mmap") == 0) {
+		mmap_summary();
 	} else if (strcmp(cmd, "pmem") == 0) {
-		physical_memory_summary();
+		pmem_print_summary();
 	} else if (strcmp(cmd, "exit") == 0) {
 		_running = false;
 	} else {
@@ -83,7 +85,7 @@ void run_cmd(char* cmd) {
 	}
 }
 
-void physical_memory_summary() {
+void mmap_summary() {
 	multiboot_info* bootinfo = get_bootinfo();
 
 	uint64_t memory_size = 1024 + bootinfo->memoryLo
