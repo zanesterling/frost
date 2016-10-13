@@ -10,9 +10,9 @@ int64_t _used_blocks = 0;
 
 
 // PRIVATE FUNCTION DEFS
-#define _set_bit(block)    _memory_map[(block) / 8] |=   1 << ((block) % 8)
-#define _unset_bit(block)  _memory_map[(block) / 8] &= ~(1 << ((block) % 8))
-#define _test_bit(block)  (_memory_map[(block) / 8] &   (1 << ((block) % 8)))
+#define _set_bit(block)   _memory_map[(block) / 8] |=   1 << ((block) % 8)
+#define _unset_bit(block) _memory_map[(block) / 8] &= ~(1 << ((block) % 8))
+#define _test_bit(block) (_memory_map[(block) / 8] &  (1 << ((block) % 8)))
 
 void _set_block(void* p, uint8_t on);
 int64_t _get_first_free_block();
@@ -64,15 +64,18 @@ void pmem_free_block(void* block) {
 }
 
 void pmem_free_blocks(void* block, uint32_t num_blocks) {
-    int64_t cur_block = ((int64_t) block) >> BLOCK_SIZE_BITS;
-    while (num_blocks--) _unset_bit(cur_block++);
+    int64_t cur_block = ((int64_t) (uint32_t) block) >> BLOCK_SIZE_BITS;
+    while (num_blocks--) {
+        _unset_bit(cur_block);
+        cur_block += 1;
+    }
 }
 
 
 // PRIVATE FUNCTION IMPLS
 // note: on MUST be 1 or 0
 void _set_block(void* p, uint8_t on) {
-	int64_t block = ((int64_t) p) >> BLOCK_SIZE_BITS;
+	int64_t block = ((int64_t) (uint32_t) p) >> BLOCK_SIZE_BITS;
 	if (on) _set_bit(block);
 	else    _unset_bit(block);
 }
