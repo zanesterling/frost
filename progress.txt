@@ -6,15 +6,16 @@ Things implemented so far:
 	* A simple output library
 	* Software interrupt handling
 	* Hardware interrupt handling
+	* Keyboard input
+	* Physical memory management
 
 In progress:
-	* Physical memory management
-	* Keyboard input
+	* Virtual memory enabling and management
+	* Floppy driver
 
 To do:
-	* Virtual memory enabling and management
 	* Simple shell for running commands / programs
+	* Hard disk driver
 	* Multiprocess scheduling
-	* Driver for hard drive / floppy
 	* Pixel graphics support
 	* GUI
