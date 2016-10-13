@@ -2,7 +2,7 @@
 
 #include <bootinfo.h>
 #include <hal.h>
-#include <io.h>
+#include <stdio.h>
 #include <keyboard.h>
 #include <pmem.h>
 
