@@ -21,6 +21,19 @@ int strcmp(const char* s1, const char* s2) {
 	return 0;
 }
 
+char* strncpy(char* dst, const char* src, size_t len) {
+	char* p = dst;
+	while (len > 0 && *src) {
+		*p++ = *src++;
+		len--;
+	}
+
+	// fill remaining space with null bytes
+	while (len-- > 0) *p++ = '\0';
+
+	return dst;
+}
+
 void* memcpy(void* dest, void* src, size_t n) {
 	uint8* d = (uint8*)dest;
 	uint8* s = (uint8*)src;
