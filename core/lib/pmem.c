@@ -1,20 +1,26 @@
 #include <pmem.h>
 
-size_t _mem_size = 0; // in KB
+// LOCAL VARIABLES
+int64_t _mem_size = 0; // in KB
 uint8_t* _memory_map = 0;
-size_t _max_blocks = 0;
-size_t _used_blocks = 0;
+int64_t _max_blocks = 0;
+int64_t _used_blocks = 0;
 
 #define BLOCK_SIZE_BITS 12
 
+
+// PRIVATE FUNCTION DEFS
 #define _set_bit(block)    _memory_map[(block) / 8] |=   1 << ((block) % 8)
 #define _unset_bit(block)  _memory_map[(block) / 8] &= ~(1 << ((block) % 8))
 #define _test_bit(block)  (_memory_map[(block) / 8] &   (1 << ((block) % 8)))
 
 void _set_block(void* p, uint8_t on);
+int64_t _get_first_free_block();
+int64_t _get_first_free_blocks(uint32_t num_blocks);
 
 
-void pmem_init(size_t mem_size, uint32_t* bitmap) {
+// PUBLIC FUNCTION IMPLS
+void pmem_init(int64_t mem_size, uint32_t* bitmap) {
 	_mem_size = mem_size;
 	_memory_map = (uint8_t*) bitmap;
 	_max_blocks = _mem_size * (1024 / PMEM_BLOCK_SIZE);
@@ -24,7 +30,7 @@ void pmem_init(size_t mem_size, uint32_t* bitmap) {
 	memset(_memory_map, 0xf, _max_blocks * PMEM_BLOCK_SIZE);
 }
 
-void pmem_init_region(void* base, size_t size) {
+void pmem_init_region(void* base, int64_t size) {
 	uint8_t* p = base;
 	while (size--) {
 		_set_block(p, 1);
@@ -32,7 +38,7 @@ void pmem_init_region(void* base, size_t size) {
 	}
 }
 
-void pmem_deinit_region(void* base, size_t size) {
+void pmem_deinit_region(void* base, int64_t size) {
 	uint8_t* p = base;
 	while (size--) {
 		_set_block(p, 0);
@@ -41,23 +47,15 @@ void pmem_deinit_region(void* base, size_t size) {
 }
 
 void* pmem_alloc_block() {
-	if (_used_blocks == _max_blocks) return NULL;
+    int64_t block = _get_first_free_block();
+    if (block < 0) return NULL;
+    return (void*) ((uint32_t)block * PMEM_BLOCK_SIZE);
+}
 
-	uint8_t* p = _memory_map;
-	for (size_t i = 0; i < _max_blocks; i += 8) {
-		// check for full byte
-		if (*p++ == 0xff) continue;
-
-		for (int j = 0; j < 8; j++) {
-			if (!_test_bit(i + j)) {
-				_set_bit(i + j);
-				_used_blocks++;
-				return (void*) ((i + j) * PMEM_BLOCK_SIZE);
-			}
-		}
-	}
-
-	return NULL;
+void* pmem_alloc_blocks(uint32_t num_blocks) {
+    int64_t start = _get_first_free_blocks(num_blocks);
+    if (start < 0) return NULL;
+    return (void*) ((uint32_t)start * PMEM_BLOCK_SIZE);
 }
 
 void pmem_free_block(void* block) {
@@ -65,10 +63,51 @@ void pmem_free_block(void* block) {
 	_used_blocks--;
 }
 
+void pmem_free_blocks(void* block, uint32_t num_blocks) {
+    int64_t cur_block = ((int64_t) block) >> BLOCK_SIZE_BITS;
+    while (num_blocks--) _unset_bit(cur_block++);
+}
 
+
+// PRIVATE FUNCTION IMPLS
 // note: on MUST be 1 or 0
 void _set_block(void* p, uint8_t on) {
-	size_t block = ((size_t) p) >> BLOCK_SIZE_BITS;
+	int64_t block = ((int64_t) p) >> BLOCK_SIZE_BITS;
 	if (on) _set_bit(block);
 	else    _unset_bit(block);
+}
+
+int64_t _get_first_free_block() {
+    if (_used_blocks == _max_blocks) return -1;
+
+	for (int64_t i = 0; i < _max_blocks; i += 8) {
+		// check for full byte
+		if (_memory_map[i / 8] == 0xff) continue;
+
+		for (int j = 0; j < 8; j++) {
+			if (!_test_bit(i + j)) {
+				return i + j;
+			}
+		}
+	}
+
+    return -1;
+}
+
+int64_t _get_first_free_blocks(uint32_t num_blocks) {
+    if (_max_blocks - _used_blocks < num_blocks) return -1;
+
+    for (int64_t i = 0; i < _max_blocks; i++) {
+        int found = 1;
+        for (uint32_t j = 0; j < num_blocks; j++) {
+            if (_test_bit(i + j)) {
+                found = 0;
+                break;
+            }
+        }
+
+        if (found) return i;
+    }
+
+    return -1;
 }
