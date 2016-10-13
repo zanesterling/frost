@@ -34,6 +34,11 @@ typedef struct mmap_entry {
 	uint32_t acpi_null; // reserved
 } mmap_entry;
 
+struct mem_map {
+    uint32_t len;
+    struct mmap_entry* addr;
+};
+
 enum MMAP_ENTRY_TYPE {
 	MMAP_TYPE_AVAILABLE    = 1,
 	MMAP_TYPE_RESERVED     = 2,
@@ -46,3 +51,5 @@ enum MMAP_ENTRY_TYPE {
 	(type == MMAP_TYPE_RESERVED     ? "reserved"     : \
 	(type == MMAP_TYPE_ACPI_RECLAIM ? "acpi reclaim" : \
 	(type == MMAP_TYPE_ACPI_NVS     ? "acpi nvs"     : "bad type"))))
+
+uint64_t get_memory_size_kb(struct multiboot_info* bootinfo);

@@ -4,6 +4,7 @@
 #include <hal.h>
 #include <io.h>
 #include <keyboard.h>
+#include <pmem.h>
 
 #include "exception.h"
 #include "shell.h"

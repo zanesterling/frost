@@ -1,7 +1,7 @@
 #include <pmem.h>
 
 // LOCAL VARIABLES
-int64_t _mem_size = 0; // in KB
+uint64_t _mem_size = 0; // in KB
 uint8_t* _memory_map = 0;
 int64_t _max_blocks = 0;
 int64_t _used_blocks = 0;
@@ -20,7 +20,7 @@ int64_t _get_first_free_blocks(uint32_t num_blocks);
 
 
 // PUBLIC FUNCTION IMPLS
-void pmem_init(int64_t mem_size, uint32_t* bitmap) {
+void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 	_mem_size = mem_size;
 	_memory_map = (uint8_t*) bitmap;
 	_max_blocks = _mem_size * (1024 / PMEM_BLOCK_SIZE);
@@ -28,6 +28,28 @@ void pmem_init(int64_t mem_size, uint32_t* bitmap) {
 
 	// all memory is in use by default
 	memset(_memory_map, 0xf, _max_blocks * PMEM_BLOCK_SIZE);
+    _used_blocks = _max_blocks;
+
+    struct mmap_entry* entry = memory_map.addr;
+    for (uint32_t i = 0; i < memory_map.len; i++) {
+        if (
+            entry->type == MMAP_TYPE_AVAILABLE
+            && entry->length > PMEM_BLOCK_SIZE
+        ) {
+            uint64_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
+                / PMEM_BLOCK_SIZE;
+            void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
+
+            // account for start shifting
+            uint32_t shift = PMEM_BLOCK_SIZE
+                - (entry->base_address % PMEM_BLOCK_SIZE);
+            uint32_t num_blocks = (entry->length - shift) / PMEM_BLOCK_SIZE;
+
+            pmem_free_blocks(start_pointer, num_blocks);
+        }
+
+        entry++;
+    }
 }
 
 void pmem_init_region(void* base, int64_t size) {
@@ -49,12 +71,16 @@ void pmem_deinit_region(void* base, int64_t size) {
 void* pmem_alloc_block() {
     int64_t block = _get_first_free_block();
     if (block < 0) return NULL;
+
+    _used_blocks++;
     return (void*) ((uint32_t)block * PMEM_BLOCK_SIZE);
 }
 
 void* pmem_alloc_blocks(uint32_t num_blocks) {
     int64_t start = _get_first_free_blocks(num_blocks);
     if (start < 0) return NULL;
+
+    _used_blocks += num_blocks;
     return (void*) ((uint32_t)start * PMEM_BLOCK_SIZE);
 }
 
@@ -65,6 +91,7 @@ void pmem_free_block(void* block) {
 
 void pmem_free_blocks(void* block, uint32_t num_blocks) {
     int64_t cur_block = ((int64_t) (uint32_t) block) >> BLOCK_SIZE_BITS;
+    _used_blocks -= num_blocks;
     while (num_blocks--) {
         _unset_bit(cur_block);
         cur_block += 1;

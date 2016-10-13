@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bootinfo.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -8,7 +9,7 @@
 
 // TODO: Make this multiprocess safe
 
-void pmem_init(int64_t memSize, uint32_t* bitmap);
+void pmem_init(size_t memSize, uint32_t* bitmap, struct mem_map memory_map);
 void pmem_init_region(void* base, int64_t size);
 void pmem_deinit_region(void* base, int64_t size);
 
