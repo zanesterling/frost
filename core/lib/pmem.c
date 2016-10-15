@@ -3,8 +3,8 @@
 // LOCAL VARIABLES
 uint64_t _mem_size = 0; // in KB
 uint8_t* _memory_map = 0;
-int64_t _max_blocks = 0;
-int64_t _used_blocks = 0;
+uint32_t _max_blocks = 0;
+uint32_t _used_blocks = 0;
 
 #define BLOCK_SIZE_BITS 12
 
@@ -38,7 +38,7 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 			&& entry->length > PMEM_BLOCK_SIZE
 		) {
 			// align to block boundaries
-			uint64_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
+			uint32_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
 				/ PMEM_BLOCK_SIZE;
 			void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
 
@@ -93,7 +93,7 @@ void pmem_free_block(void* block) {
 }
 
 void pmem_free_blocks(void* block, uint32_t num_blocks) {
-	int64_t cur_block = ((int64_t) (uint32_t) block) >> BLOCK_SIZE_BITS;
+	uint32_t cur_block = ((uint32_t) block) >> BLOCK_SIZE_BITS;
 	_used_blocks -= num_blocks;
 	while (num_blocks--) {
 		_unset_bit(cur_block);
@@ -110,7 +110,7 @@ void pmem_print_summary() {
 // PRIVATE FUNCTION IMPLS
 // note: on MUST be 1 or 0
 void _set_block(void* p, uint8_t on) {
-	int64_t block = ((int64_t) (uint32_t) p) >> BLOCK_SIZE_BITS;
+	uint32_t block = ((uint32_t) p) >> BLOCK_SIZE_BITS;
 	if (on) _set_bit(block);
 	else    _unset_bit(block);
 }
