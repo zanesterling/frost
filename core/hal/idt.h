@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdint.h"
+#include <stdio.h>
 
 #define I86_MAX_INTERRUPTS 256
 
