@@ -29,8 +29,8 @@ void update_cursor();
 void clear_screen();
 void clear_rest_of_row();
 
-void itoa(const int x, char* buf);
-void itoa_s(const int x, char* buf, const size_t base, const char* base_chars);
+void itoa(const int64_t x, char* buf);
+void itoa_s(const int64_t x, char* buf, const uint8_t base, const char* base_chars);
 
 char getch();
 uint8 getScancode();

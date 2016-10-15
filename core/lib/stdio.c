@@ -173,18 +173,18 @@ void update_cursor() {
 
 /* UTILITIES */
 
-void itoa(int x, char* buf) {
+void itoa(int64_t x, char* buf) {
 	itoa_s(x, buf, 10, base_10_chars);
 }
 
-void itoa_s(int x, char* buf, const size_t base, const char* base_chars) {
+void itoa_s(int64_t x, char* buf, const uint8_t base, const char* base_chars) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
 		buf[1] = '\0';
 		return;
 	}
 
-	uint8 len = 0;
+	uint8_t len = 0;
 	while (x > 0) {
 		buf[len++] = base_chars[x % base];
 		x /= base;

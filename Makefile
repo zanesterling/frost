@@ -3,7 +3,7 @@
 CC=gcc
 OBJCOPY=objcopy
 CFLAGS = -g -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
-LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib
+LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
 BUILD_DIR=build
 QEMU = qemu-system-i386
 
