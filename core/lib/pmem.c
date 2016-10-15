@@ -23,7 +23,7 @@ int64_t _get_first_free_blocks(uint32_t num_blocks);
 void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 	_mem_size = mem_size;
 	_memory_map = (uint8_t*) bitmap;
-	_max_blocks = _mem_size / PMEM_BLOCK_SIZE * 1024;
+	_max_blocks = _mem_size * 1024 / PMEM_BLOCK_SIZE;
 	_used_blocks = _max_blocks;
 
 	// all memory is in use by default
