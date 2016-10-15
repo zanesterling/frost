@@ -107,17 +107,18 @@ void pmem_print_summary() {
 	bool in_use = _test_bit(0) ? true : false;
 	size_t last_ptr = 0;
 	for (uint32_t block = 0; block < _max_blocks; block++) {
-		if ((block == (_max_blocks - 1)) | (!_test_bit(block) != !in_use)) {
+		if (!_test_bit(block) != !in_use) {
 			size_t new_ptr = ((size_t) block) * PMEM_BLOCK_SIZE;
 			printf("\t0x%x - 0x%x ", last_ptr, new_ptr);
-
-			if (in_use) puts("in use\n");
-			else puts("free\n");
+			puts(in_use ? "in use\n" : "free\n");
 
 			in_use = !in_use;
 			last_ptr = new_ptr;
 		}
 	}
+
+	printf("\t0x%x - 0x%x ", last_ptr, ((size_t) _max_blocks) * PMEM_BLOCK_SIZE);
+	puts(in_use ? "in use\n" : "free\n");
 
 	printf("%u blocks in use out of %u total\n", _used_blocks, _max_blocks);
 	printf("%llu KB total memory\n", _mem_size);
