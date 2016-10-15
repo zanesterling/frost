@@ -109,13 +109,24 @@ void printf(const char* fmt, ...) {
 					done = 1;
 					break;
 
+				case 'u':
+					if (length == 0) x = va_arg(argp, unsigned char);
+					else if (length == 1) x = va_arg(argp, unsigned short);
+					else if (length == 2) x = va_arg(argp, unsigned int);
+					else if (length == 3) x = va_arg(argp, unsigned long);
+					else if (length == 4) x = va_arg(argp, unsigned long long);
+					itoa_unsigned(x, buf);
+					puts(buf);
+					done = 1;
+					break;
+
 				case 'x':
 					if (length == 0) x = va_arg(argp, char);
 					else if (length == 1) x = va_arg(argp, short);
 					else if (length == 2) x = va_arg(argp, int);
 					else if (length == 3) x = va_arg(argp, long);
 					else if (length == 4) x = va_arg(argp, long long);
-					itoa_s(x, buf, 16, hex_chars);
+					itoa_s_unsigned(x, buf, 16, hex_chars);
 					puts(buf);
 					done = 1;
 					break;
@@ -177,7 +188,45 @@ void itoa(int64_t x, char* buf) {
 	itoa_s(x, buf, 10, base_10_chars);
 }
 
+void itoa_unsigned(uint64_t x, char* buf) {
+	itoa_s_unsigned(x, buf, 10, base_10_chars);
+}
+
 void itoa_s(int64_t x, char* buf, const uint8_t base, const char* base_chars) {
+	if (x == 0) {
+		buf[0] = base_chars[0];
+		buf[1] = '\0';
+		return;
+	}
+
+	bool negative = x < 0;
+	if (negative) x = -x;
+
+	uint8_t len = 0;
+	while (x > 0) {
+		buf[len++] = base_chars[x % base];
+		x /= base;
+	}
+
+	/* int gets put in backwards, reverse it */
+	for (uint8 i = 0; i < len / 2; i++) {
+		char tmp = buf[i];
+		buf[i] = buf[len-1 - i];
+		buf[len-1 - i] = tmp;
+	}
+	buf[len] = '\0';
+
+	if (negative) {
+		for (int i = len + 1; i > 0; i--) {
+			buf[i] = buf[i - 1];
+		}
+		buf[0] = '-';
+	}
+}
+
+void itoa_s_unsigned(
+	uint64_t x, char* buf, const uint8_t base, const char* base_chars
+) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
 		buf[1] = '\0';
