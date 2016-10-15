@@ -102,8 +102,25 @@ void pmem_free_blocks(void* block, uint32_t num_blocks) {
 }
 
 void pmem_print_summary() {
-    for (uint32_t block = 0; block < _max_blocks; block++) {
-    }
+	puts("Physical memory summary:\n");
+
+	bool in_use = _test_bit(0) ? true : false;
+	size_t last_ptr = 0;
+	for (uint32_t block = 0; block < _max_blocks; block++) {
+		if ((block == (_max_blocks - 1)) | (!_test_bit(block) != !in_use)) {
+			size_t new_ptr = ((size_t) block) * PMEM_BLOCK_SIZE;
+			printf("\t0x%x - 0x%x ", last_ptr, new_ptr);
+
+			if (in_use) puts("in use\n");
+			else puts("free\n");
+
+			in_use = !in_use;
+			last_ptr = new_ptr;
+		}
+	}
+
+	printf("%u blocks in use out of %u total\n", _used_blocks, _max_blocks);
+	printf("%llu KB total memory\n", _mem_size);
 }
 
 
