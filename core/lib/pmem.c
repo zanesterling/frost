@@ -37,6 +37,8 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 			entry->type == MMAP_TYPE_AVAILABLE
 			&& entry->length > PMEM_BLOCK_SIZE
 		) {
+			if (entry->base_address / 1024 > _mem_size) continue;
+
 			// align to block boundaries
 			uint32_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
 				/ PMEM_BLOCK_SIZE;
