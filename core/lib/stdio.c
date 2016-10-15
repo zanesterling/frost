@@ -130,6 +130,13 @@ void clear_screen() {
 	update_cursor();
 }
 
+void clear_rest_of_row() {
+	uint16_t* p = ((uint16_t*) VID_MEM) + _CurY * COLS + _CurX;
+	for (size_t i = _CurX; i < COLS; i++) {
+		*p++ = 0;
+	}
+}
+
 void move_cursor(uint8_t x, uint8_t y) {
 	_CurX = x;
 	_CurY = y;

@@ -26,6 +26,7 @@ void run_shell() {
 
 void get_cmd(char* cmd_buf, size_t buflen) {
 	puts("? ");
+	clear_rest_of_row();
 
 	size_t i = 0;
 	KEYCODE key = KEY_UNKNOWN;
