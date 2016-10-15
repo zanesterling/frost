@@ -30,8 +30,7 @@ int init(multiboot_info* bootinfo) {
         bootinfo->mmap_length,
         (struct mmap_entry*) bootinfo->mmap_addr
     };
-    void* bitmap_location = NULL;
-
+    void* bitmap_location = (void*) 0x1000;
     pmem_init(mem_size, bitmap_location, memory_map);
 
 	return 0;

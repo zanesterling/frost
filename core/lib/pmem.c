@@ -23,28 +23,31 @@ int64_t _get_first_free_blocks(uint32_t num_blocks);
 void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 	_mem_size = mem_size;
 	_memory_map = (uint8_t*) bitmap;
-	_max_blocks = _mem_size * (1024 / PMEM_BLOCK_SIZE);
+	_max_blocks = _mem_size / PMEM_BLOCK_SIZE * 1024;
 	_used_blocks = _max_blocks;
 
 	// all memory is in use by default
 	memset(_memory_map, 0xf, _max_blocks * PMEM_BLOCK_SIZE);
 	_used_blocks = _max_blocks;
 
+	// parse memory map and unset available memory
 	struct mmap_entry* entry = memory_map.addr;
 	for (uint32_t i = 0; i < memory_map.len; i++) {
 		if (
 			entry->type == MMAP_TYPE_AVAILABLE
 			&& entry->length > PMEM_BLOCK_SIZE
 		) {
+			// align to block boundaries
 			uint64_t start_block = (entry->base_address + PMEM_BLOCK_SIZE - 1)
 				/ PMEM_BLOCK_SIZE;
 			void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
 
-			// account for start shifting
+			// account for alignment
 			uint32_t shift = PMEM_BLOCK_SIZE
 				- (entry->base_address % PMEM_BLOCK_SIZE);
 			uint32_t num_blocks = (entry->length - shift) / PMEM_BLOCK_SIZE;
 
+			// unset blocks
 			pmem_free_blocks(start_pointer, num_blocks);
 		}
 
