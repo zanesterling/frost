@@ -11,6 +11,7 @@
 #define ROWS 25
 #define VID_MEM_MAX (VID_MEM + COLS * ROWS * 2)
 #define CHAR_ATTRIB 15 /* white on black */
+#define TABWIDTH 4
 
 uint8_t _CurX, _CurY;
 

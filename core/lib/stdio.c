@@ -8,6 +8,15 @@ static const char hex_chars[16] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
 
+#define STEP_CURSOR() _CurX++; \
+	if (_CurX == COLS) { \
+		_CurX = 0; \
+		_CurY++; \
+	}
+
+void _raw_putch(const char c);
+
+
 /* Public stuff */
 void putch(const char c) {
 	if (_CurY == ROWS) {
@@ -15,26 +24,33 @@ void putch(const char c) {
 	}
 
 	if (c == '\n') {
-		for (; _CurX < COLS; _CurX++) {
-			uint8_t* p = (uint8_t*)VID_MEM + 2 * (_CurY * COLS + _CurX);
-			*p = ' ';
-			*++p = CHAR_ATTRIB;
+		while (_CurX < COLS) {
+			_raw_putch(' ');
+			_CurX++;
 		}
 
 		_CurX = 0;
 		++_CurY;
+	} else if (c == '\t') {
+		do {
+			_raw_putch(' ');
+			STEP_CURSOR();
+		} while (_CurX % TABWIDTH != 0);
 	} else {
 		unsigned char* p = (unsigned char*)VID_MEM;
-		p += 2 * (_CurY * COLS + _CurX++);
+		p += 2 * (_CurY * COLS + _CurX);
 		*p++ = c;
 		*p = CHAR_ATTRIB;
 
-		if (_CurX >= COLS) {
-			_CurX = 0;
-			++_CurY;
-		}
+		STEP_CURSOR();
 	}
 	update_cursor();
+}
+
+void _raw_putch(const char c) {
+	uint8_t* p = (uint8_t*)VID_MEM + 2 * (_CurY * COLS + _CurX);
+	*p = c;
+	*(p+1) = CHAR_ATTRIB;
 }
 
 void scroll(const uint8 numRows) {
