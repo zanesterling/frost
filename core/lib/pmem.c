@@ -27,7 +27,7 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 	_used_blocks = _max_blocks;
 
 	// all memory is in use by default
-	memset(_memory_map, 0xf, _max_blocks * PMEM_BLOCK_SIZE);
+	memset(_memory_map, 0xff, (_max_blocks + 7) / 8);
 	_used_blocks = _max_blocks;
 
 	// parse memory map and unset available memory
@@ -97,7 +97,7 @@ void pmem_free_blocks(void* block, uint32_t num_blocks) {
 	_used_blocks -= num_blocks;
 	while (num_blocks--) {
 		_unset_bit(cur_block);
-		cur_block += 1;
+		cur_block++;
 	}
 }
 
