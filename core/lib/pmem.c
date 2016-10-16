@@ -45,8 +45,8 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 			void* start_pointer = (void*)(uint32_t) (start_block * PMEM_BLOCK_SIZE);
 
 			// account for alignment
-			uint32_t shift = PMEM_BLOCK_SIZE
-				- (entry->base_address % PMEM_BLOCK_SIZE);
+			uint32_t shift = (PMEM_BLOCK_SIZE - entry->base_address)
+				% PMEM_BLOCK_SIZE;
 			uint32_t num_blocks = (entry->length - shift) / PMEM_BLOCK_SIZE;
 
 			// unset blocks

@@ -25,6 +25,7 @@ int init(multiboot_info* bootinfo) {
 	enable_interrupts();
 	kbrd_install(33);
 
+	// initialize physical memory
 	uint64_t mem_size = get_memory_size_kb(bootinfo);
 	struct mem_map memory_map = (struct mem_map) {
 		bootinfo->mmap_length,
