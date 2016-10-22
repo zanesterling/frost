@@ -6,6 +6,7 @@ bool _running;
 
 void get_cmd(char* cmd_buf, size_t buflen);
 void run_cmd(char* cmd);
+void help();
 void mmap_summary();
 
 
@@ -69,12 +70,7 @@ void run_cmd(char* cmd) {
 	if (*cmd == '\0') return;
 
 	if (strcmp(cmd, "help") == 0) {
-		puts(
-			"help: list runnable commands\n"
-			"clear: blank the display\n"
-			"mmap: show the BIOS memory map\n"
-			"exit: exit FrOSt\n"
-		);
+		help();
 	} else if (strcmp(cmd, "clear") == 0) {
 		clear_screen();
 	} else if (strcmp(cmd, "mmap") == 0) {
@@ -86,6 +82,16 @@ void run_cmd(char* cmd) {
 	} else {
 		printf("command '%s' not recognized\n", cmd);
 	}
+}
+
+void help() {
+	puts(
+		"help: list runnable commands\n"
+		"clear: blank the display\n"
+		"mmap: show the BIOS memory map\n"
+		"pmem: show a summary of the physical memory allocation\n"
+		"exit: exit FrOSt\n"
+	);
 }
 
 void mmap_summary() {

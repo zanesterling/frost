@@ -34,5 +34,7 @@ int init(multiboot_info* bootinfo) {
 	void* bitmap_location = (void*) 0x1000;
 	pmem_init(mem_size, bitmap_location, memory_map);
 
+	init_proclist();
+
 	return 0;
 }

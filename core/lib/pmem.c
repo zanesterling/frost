@@ -6,6 +6,9 @@ uint8_t* _memory_map = 0;
 uint32_t _max_blocks = 0;
 uint32_t _used_blocks = 0;
 
+// Always leq index of first unused block
+uint32_t _first_unused = 0;
+
 #define BLOCK_SIZE_BITS 12
 
 
@@ -87,6 +90,12 @@ void* pmem_alloc_blocks(uint32_t num_blocks) {
 
 	_used_blocks += num_blocks;
 	return (void*) ((uint32_t)start * PMEM_BLOCK_SIZE);
+}
+
+void* pmem_alloc_memory(size_t mem_size) {
+	return pmem_alloc_blocks(
+		(mem_size + PMEM_BLOCK_SIZE - 1) / PMEM_BLOCK_SIZE
+	);
 }
 
 void pmem_free_block(void* block) {

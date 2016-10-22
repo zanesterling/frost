@@ -7,6 +7,7 @@
 #include <pmem.h>
 
 #include "exception.h"
+#include "process.h"
 #include "shell.h"
 
 int init();
