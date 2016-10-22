@@ -44,6 +44,10 @@ struct process* new_process() {
 	return NULL;
 }
 
+void free_process(struct process* proc) {
+	proc->in_use = false;
+}
+
 struct process* get_process(uint32_t pid) {
 	if (!_is_valid_pid(pid)) return NULL;
 	return _proclist + pid;
