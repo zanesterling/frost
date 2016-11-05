@@ -13,7 +13,7 @@
 #define CHAR_ATTRIB 15 /* white on black */
 #define TABWIDTH 4
 
-uint8_t _CurX, _CurY;
+static uint8_t _CurX, _CurY;
 
 struct cursor_loc {
 	uint8_t x, y;
