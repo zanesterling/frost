@@ -93,8 +93,6 @@ static uint8_t _scancode = INVALID_SCANCODE;
 static bool _numlock, _scrolllock, _capslock;
 static bool _shift, _alt, _ctrl;
 
-static int _kbrd_error = 0;
-
 // set if BAT failed
 static bool _kbrd_bat_res = false;
 
@@ -103,9 +101,6 @@ static bool _kbrd_diag_res = false;
 
 // set if system should resend last command
 static bool _kbrd_resend_res = false;
-
-// set if keyboard is disabled
-static bool _kbrd_disable = false;
 
 // map from make code to scan code
 static int _kbrd_scancode_std[] = {

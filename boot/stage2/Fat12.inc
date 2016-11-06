@@ -12,6 +12,7 @@
 
 bits	16
 
+%include "util/stdio.inc"
 %include "stage2/Floppy16.inc"					; the erm.. floppy driver
 
 %define ROOT_OFFSET 0x2e00
@@ -147,8 +148,7 @@ FindFile:
 ;*******************************************
 
 LoadFile:
-
-	xor	ecx, ecx		; size of file in sectors
+	xor	ecx, ecx
 	push	ecx
 
 .FIND_FILE:
@@ -165,7 +165,6 @@ LoadFile:
 	ret
 
 .LOAD_IMAGE_PRE:
-
 	sub	edi, ROOT_OFFSET
 	sub	eax, ROOT_OFFSET
 
@@ -182,7 +181,6 @@ LoadFile:
 	call	LoadFAT
 
 .LOAD_IMAGE:
-
 	; load the cluster
 
 	mov	ax, WORD [cluster]	; cluster to read

@@ -3,6 +3,8 @@
 // LOCAL VARIABLES
 uint64_t _mem_size = 0; // in KB
 uint8_t* _memory_map = 0;
+
+uint32_t _map_size = 0;
 uint32_t _max_blocks = 0;
 uint32_t _used_blocks = 0;
 
@@ -10,6 +12,7 @@ uint32_t _used_blocks = 0;
 uint32_t _first_unused = 0;
 
 #define BLOCK_SIZE_BITS 12
+#define BLOCKS_PER_UNIT 8
 
 
 // PRIVATE FUNCTION DEFS
@@ -27,10 +30,11 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 	_mem_size = mem_size;
 	_memory_map = (uint8_t*) bitmap;
 	_max_blocks = _mem_size * 1024 / PMEM_BLOCK_SIZE;
+	_map_size = (_max_blocks + 7) / 8;
 	_used_blocks = _max_blocks;
 
 	// all memory is in use by default
-	memset(_memory_map, 0xff, (_max_blocks + 7) / 8);
+	memset(_memory_map, 0xff, _map_size);
 	_used_blocks = _max_blocks;
 
 	// parse memory map and unset available memory

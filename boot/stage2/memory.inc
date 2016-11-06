@@ -81,6 +81,7 @@ BiosGetBigMemorySize:
     mov bx, 0
     pop edx
     pop ecx
+    ret
 
 ;*******************************************
 ; BiosGetMemoryMap

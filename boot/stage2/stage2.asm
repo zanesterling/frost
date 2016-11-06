@@ -37,7 +37,8 @@ jmp main    ; jump to main
 section .data
 
 LoadingMsg db "Preparing to load operating system...",13,10,0
-MsgFailure db 0x0d, 0x0a, "ERROR: file kernel.sys not found. Press any key to reboot.", 0x0d, 0x0a, 0
+MsgFailure db 13,10,"ERROR: file kernel.sys not found. Press any key to reboot.",13,10,0
+MsgBadElfHeader db 13,10,"ERROR: bad elf headers.",13,10,0
 
 boot_info:
 istruc multiboot_info
@@ -64,6 +65,8 @@ istruc multiboot_info
 	at multiboot_info.vbe_interface_off,dw 0
 	at multiboot_info.vbe_interface_len,dw 0
 iend
+
+section .bss
 
 memory_map: resb MemoryMapEntry.size * 32
 
@@ -167,6 +170,7 @@ main:
 ;*************************************************;
 
 bits 32
+%include "stage2/elf.inc"
 
 MsgToKernel db "Jumping to kernel", 0x0a, 0
 
@@ -186,19 +190,13 @@ Stage3:
         call Puts32
 
     ;********************************;
-    ;   Copy kernel to 1mb
+    ;   Parse elf headers
     ;********************************;
-    CopyImage:
-        mov eax, dword [ImageSize]
-        movzx ebx, word [bpbBytesPerSector]
-        mul ebx
-        mov ebx, 4
-        div ebx
-        cld
         mov esi, IMAGE_RMODE_BASE
-        mov edi, IMAGE_PMODE_BASE
-        mov ecx, eax
-    rep movsd
+        call ElfLoadBinary
+
+        shr ecx, 9
+        mov edx, ecx
 
     ;********************************;
     ;   Execute kernel
@@ -207,7 +205,6 @@ Stage3:
     cli
     mov eax, 0x2BADB002
     mov ebx, 0
-    mov edx, dword [ImageSize]
 
     push dword boot_info
     push dword STOP; junk return address

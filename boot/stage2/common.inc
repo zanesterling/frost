@@ -8,6 +8,9 @@
 ; where the kernel is to be loaded to in real mode
 %define IMAGE_RMODE_BASE 0x3000
 
+; kernel.bin elf file memory location
+%define ELF_RMODE_BASE 
+
 section .data
 
 ; kernel name (Must be 11 bytes)
