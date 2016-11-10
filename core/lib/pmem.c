@@ -65,8 +65,6 @@ void pmem_init(size_t mem_size, uint32_t* bitmap, struct mem_map memory_map) {
 
 	// reset memory used by the manager
 	uint32_t offset = (((uint32_t)bitmap) % PMEM_BLOCK_SIZE);
-	printf("bitmap stt: 0x%x\n", bitmap);
-	printf("bitmap end: 0x%x\n", (uint32_t)bitmap + _map_size);
 	pmem_init_region(
 		(void*)((uint32_t)bitmap - offset),
 		(_map_size + offset + PMEM_BLOCK_SIZE - 1) / PMEM_BLOCK_SIZE

@@ -48,8 +48,6 @@ int init(multiboot_info* bootinfo) {
 		bootinfo->mmap_length,
 		(struct mmap_entry*) bootinfo->mmap_addr
 	};
-	printf("kernel_size: 0x%x\n", kernel_size * 512);
-	printf("kernel_end: 0x%x\n", kernel_end);
 	pmem_init(mem_size, kernel_end, memory_map);
 	pmem_init_region(
 		(void*)0x100000,
