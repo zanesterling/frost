@@ -2,7 +2,7 @@
 
 CC=gcc
 OBJCOPY=objcopy
-CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
+CFLAGS = -fdiagnostics-color=always -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
 BUILD_DIR=build
 QEMU = qemu-system-i386
@@ -25,9 +25,8 @@ STAGE1_FILES = $(wildcard boot/stage1/*.asm) $(wildcard boot/stage1/*.inc)
 STAGE2_FILES = $(wildcard boot/stage2/*.asm) $(wildcard boot/stage2/*.inc)
 
 MAIN_FILES = core/kernel/entry.c core/kernel/main.c
-C_FILES = $(wildcard core/lib/*.c) $(wildcard core/hal/*.c) $(filter-out $(MAIN_FILES),$(wildcard core/kernel/*.c))
-OBJ_FILES = $(patsubst core/kernel/%.c,kernel/%.o, $(patsubst core/lib/%.c,%.o, $(patsubst core/hal/%.c,hal/%.o,$(C_FILES))))
-OBJ_FILES := $(addprefix $(BUILD_DIR)/,$(OBJ_FILES))
+C_FILES = $(filter-out $(MAIN_FILES), $(shell find core -type f -name '*.c'))
+OBJ_FILES = $(patsubst %.c, build/%.o, $(C_FILES))
 
 IMAGE = myfloppy.img
 
@@ -45,9 +44,7 @@ $(IMAGE): build_dir $(BIN_FILES)
 	dcopy $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
 
 build_dir:
-	mkdir -p $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)/hal
-	mkdir -p $(BUILD_DIR)/kernel
+	find core -type d | sed 's_^_$(BUILD_DIR)/_' | xargs mkdir -p
 
 $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 	nasm -f bin -i boot/ $+ -o $@
@@ -55,17 +52,12 @@ $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 $(BUILD_DIR)/stage2.bin: $(STAGE2_FILES)
 	nasm -f bin -i boot/ boot/stage2/stage2.asm -o $@
 
-$(BUILD_DIR)/hal/%.o: core/hal/%.c
-	$(CC) $(CFLAGS) -c $+ -o $@
+$(BUILD_DIR)/built_core: build_dir $(C_FILES)
+	@parallel --bar '$(CC) $(CFLAGS) {} $(LFLAGS) -c -o $(BUILD_DIR)/{.}.o' ::: $(C_FILES)
+	touch $@
 
-$(BUILD_DIR)/%.o: core/lib/%.c
-	$(CC) $(CFLAGS) -c $+ -o $@
-
-$(BUILD_DIR)/kernel/%.o: core/kernel/%.c
-	$(CC) $(CFLAGS) -c $+ -o $@
-
-$(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(OBJ_FILES)
-	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
+$(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(C_FILES) $(BUILD_DIR)/built_core
+	$(CC) $(CFLAGS) $(MAIN_FILES) $(OBJ_FILES) $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
 
 build: clean all
 force: clean all run
