@@ -2,7 +2,7 @@
 
 CC=gcc
 OBJCOPY=objcopy
-CFLAGS = -fdiagnostics-color=always -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
+CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
 BUILD_DIR=build
 QEMU = qemu-system-i386
@@ -26,7 +26,9 @@ STAGE2_FILES = $(wildcard boot/stage2/*.asm) $(wildcard boot/stage2/*.inc)
 
 MAIN_FILES = core/kernel/entry.c core/kernel/main.c
 C_FILES = $(filter-out $(MAIN_FILES), $(shell find core -type f -name '*.c'))
-OBJ_FILES = $(patsubst %.c, build/%.o, $(C_FILES))
+# for some reason the lib files need to come first. ¯\_(ツ)_/¯
+C_FILES := $(filter core/lib/%,$(C_FILES)) $(filter-out core/lib/%,$(C_FILES))
+OBJ_FILES = $(patsubst %.c, $(BUILD_DIR)/%.o, $(C_FILES))
 
 IMAGE = myfloppy.img
 
@@ -44,7 +46,7 @@ $(IMAGE): build_dir $(BIN_FILES)
 	dcopy $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
 
 build_dir:
-	find core -type d | sed 's_^_$(BUILD_DIR)/_' | xargs mkdir -p
+	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 	nasm -f bin -i boot/ $+ -o $@
@@ -52,12 +54,13 @@ $(BUILD_DIR)/stage1.bin: boot/stage1/stage1.asm
 $(BUILD_DIR)/stage2.bin: $(STAGE2_FILES)
 	nasm -f bin -i boot/ boot/stage2/stage2.asm -o $@
 
-$(BUILD_DIR)/built_core: build_dir $(C_FILES)
-	@parallel --bar '$(CC) $(CFLAGS) {} $(LFLAGS) -c -o $(BUILD_DIR)/{.}.o' ::: $(C_FILES)
-	touch $@
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(BUILD_DIR)/$(dir $+)
+	@$(CC) $(CFLAGS) -c $+ -o $@
+	@echo 'gcc -c $+ -o $@'
 
-$(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(C_FILES) $(BUILD_DIR)/built_core
-	$(CC) $(CFLAGS) $(MAIN_FILES) $(OBJ_FILES) $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
+$(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(OBJ_FILES)
+	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
 
 build: clean all
 force: clean all run
