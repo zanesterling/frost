@@ -54,7 +54,9 @@ int init(multiboot_info* bootinfo) {
 		(kernel_size * 512 + PMEM_BLOCK_SIZE - 1) / PMEM_BLOCK_SIZE
 	);
 
-	init_proclist();
+	vmem_init();
+
+	//init_proclist();
 
 	return 0;
 }

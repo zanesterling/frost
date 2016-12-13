@@ -26,3 +26,4 @@ void pmem_print_summary();
 
 void pmem_set_pdbr(physical_addr addr);
 physical_addr pmem_get_pdbr();
+void pmem_paging_enable(bool do_it);

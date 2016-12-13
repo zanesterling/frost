@@ -65,4 +65,4 @@ void vmem_free_page(pt_entry* e);
 pt_entry* vmem_pte_lookup(struct ptable* table, virtual_addr addr);
 pd_entry* vmem_pde_lookup(struct pdirectory* dir, virtual_addr addr);
 
-void vmem_init();
+bool vmem_init();

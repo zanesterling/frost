@@ -9,6 +9,7 @@
 #include "exception.h"
 #include "process.h"
 #include "shell.h"
+#include "vmem.h"
 
 int init();
 

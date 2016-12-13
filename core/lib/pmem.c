@@ -205,3 +205,21 @@ physical_addr pmem_get_pdbr() {
 	);
 	return 0; // TO SILENCE THE COMPILER; control should never reach here
 }
+
+void pmem_paging_enable(bool do_it) {
+	asm volatile(
+		"mov eax, cr0\n"
+		"cmp %0, 1\n"
+		"jne disable\n"
+
+		"or eax, 0x80000000\n"
+		"mov cr0, eax\n"
+		"jmp done\n"
+
+		"disable:\n"
+		"and eax, 0x7fffffff\n"
+		"mov cr0, eax\n"
+		"done:\n"
+		:: "r" (do_it)
+	);
+}
