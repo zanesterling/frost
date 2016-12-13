@@ -8,6 +8,8 @@
 
 #define PMEM_BLOCK_SIZE 4096
 
+typedef uint32_t physical_addr;
+
 // TODO: Make this multiprocess safe
 
 void pmem_init(size_t memSize, uint32_t* bitmap, struct mem_map memory_map);
