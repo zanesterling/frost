@@ -189,3 +189,19 @@ int64_t _get_first_free_blocks(uint32_t num_blocks) {
 
 	return -1;
 }
+
+void pmem_set_pdbr(physical_addr addr) {
+	asm(
+		"mov eax, [%0]\n"
+		"mov cr3, eax\n"
+		:: "r" (addr)
+	);
+}
+
+physical_addr pmem_get_pdbr() {
+	asm(
+		"mov eax, cr3\n"
+		"ret\n"
+	);
+	return 0; // TO SILENCE THE COMPILER; control should never reach here
+}
