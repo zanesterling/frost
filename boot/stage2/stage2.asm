@@ -30,7 +30,7 @@ jmp main    ; jump to main
 %include "stage2/gdt.inc" ; global descriptor table stuff
 %include "stage2/memory.inc" ; memory query functions
 
-
+bits 16
 ;*************************************************;
 ;   Data segment
 ;*************************************************;
@@ -171,6 +171,7 @@ main:
 
 bits 32
 %include "stage2/elf.inc"
+%include "stage2/paging.inc"
 
 MsgToKernel db "Jumping to kernel", 0x0a, 0
 
@@ -188,6 +189,9 @@ Stage3:
         call ClearScr32
         mov esi, MsgToKernel
         call Puts32
+
+        ; enable paging
+        call EnablePaging
 
     ;********************************;
     ;   Parse elf headers
