@@ -6,8 +6,6 @@
 #define HEADS_PER_TRACK 2
 #define TOTAL_SECTORS 2880
 
-#define DMA_CHANNEL 2
-
 // Digital output register bitflags
 #define DOR_ENABLE_IRQ_DMA (1 << 3)
 #define DOR_NORMAL_MODE    (1 << 2)
@@ -23,6 +21,27 @@
 #define MSR_DRIVE_2_SEEKING (1 << 2)
 #define MSR_DRIVE_1_SEEKING (1 << 1)
 #define MSR_DRIVE_0_SEEKING (1 << 0)
+
+// ====== Floppy DMA defines ======
+#define DMA_CHANNEL 2
+
+// register ports (chan 0-3)
+#define START_ADDR_REG_CHAN_1  0x02
+#define COUNT_REG_CHAN_1       0x03
+#define START_ADDR_REG_CHAN_2  0x04
+#define COUNT_REG_CHAN_2       0x05
+#define START_ADDR_REG_CHAN_3  0x06
+#define COUNT_REG_CHAN_3       0x07
+#define STATUS_REG             0x08
+#define COMMAND_REG            0x08
+#define REQUEST_REG            0x09
+#define SINGLE_CHAN_MASK_REG   0x0a
+#define MODE_REG               0x0b
+#define FLIPFLOP_RESET_REG     0x0c
+#define INTERMEDIATE_REG       0x0d
+#define MASTER_RESET_REG       0x0d
+#define MASK_RESET_REG         0x0e
+#define MULTI_CHAN_MASK_REG    0x0f
 
 SpinLock buflock;
 uint8_t buffer[BYTES_PER_SECTOR];
@@ -45,6 +64,17 @@ void _init_floppy_controller();
 // PUBLIC FUNCTION IMPLS
 void floppy_init_driver() {
 	buflock.locked = 0;
+	outbyte(SINGLE_CHAN_MASK_REG, 0x06);
+	outbyte(FLIPFLOP_RESET_REG, 0xff);
+
+	outbyte(START_ADDR_REG_CHAN_2, 0); // low byte
+	outbyte(START_ADDR_REG_CHAN_2, 0x10); // high byte
+	outbyte(FLIPFLOP_RESET_REG, 0xff);
+
+	outbyte(COUNT_REG_CHAN_2, 0xff); // low byte
+	outbyte(COUNT_REG_CHAN_2, 0x23); // high byte
+	outbyte(0x81, 0);
+	outbyte(SINGLE_CHAN_MASK_REG, 0x02);
 }
 
 void floppy_read_sector(void* dst, uint32_t sector_num) {
@@ -81,21 +111,4 @@ uint32_t _chs_to_lba(uint16_t track, uint16_t head, uint16_t sector) {
 void _read_sector_chs(
 	uint8_t drive, uint16_t track, uint16_t head, uint16_t sector
 ) {
-	// turn on motor and select drive
-	outbyte(
-		DIGITAL_OUTPUT_REGISTER,
-		(1 << (drive + 4)) | DOR_ENABLE_IRQ_DMA | DOR_NORMAL_MODE
-			| (drive & DOR_DRIVE_MASK)
-	);
-
-	// wait for motor to get up to speed
-	// issue command and parameters to fifo port
-
-
-
-	// Issue your command byte plus some parameter bytes (the "command phase") to the FIFO IO port.
-	// Exchange data with the drive / "seek" the drive heads (the "execution phase"), on the FIFO IO port.
-	// Get an IRQ6 at the end of the execution phase, but only if the command HAS an execution phase.
-	// Read any "result bytes" produced by the command (the "result phase"), on the FIFO IO port.
-	// The commands "Recalibrate", "Seek", and "Seek Relative" do not have a result phase, and require an additional "Sense Interrupt" command to be sent.
 }
