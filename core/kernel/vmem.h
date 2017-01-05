@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bool.h>
 #include <stdint.h>
 #include <pmem.h>
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bool.h"
 #include "hal.h"
 #include "irq.h"
 #include "stdint.h"

@@ -8,6 +8,7 @@
 
 #include "exception.h"
 #include "process.h"
+#include "scheduler.h"
 #include "shell.h"
 #include "vmem.h"
 

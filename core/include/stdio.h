@@ -1,10 +1,6 @@
 #pragma once
 
-#include "hal.h"
-#include "keyboard.h"
-#include "scancodes.h"
-#include "stdarg.h"
-#include "string.h"
+#include <stdint.h>
 
 #define VID_MEM 0xB8000
 #define COLS 80

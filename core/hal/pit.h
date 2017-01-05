@@ -1,6 +1,8 @@
 #pragma once
 
 #include <hal.h>
+#include <irq.h>
+#include <stddef.h>
 
 #define I86_PIT_OCW_MASK_BINCOUNT 0x1
 #define I86_PIT_OCW_MASK_MODE     0xE
@@ -23,7 +25,10 @@
 #define I86_PIT_OCW_COUNTER_1          0x40
 #define I86_PIT_OCW_COUNTER_2          0x80
 
+typedef void (* pit_handler)();
+
 void i86_pit_initialize();
+void pit_set_timer_handler(pit_handler handler);
 
 void i86_pit_send_command(uint8_t cmd);
 void i86_pit_send_data(uint16_t data, uint8_t counter);

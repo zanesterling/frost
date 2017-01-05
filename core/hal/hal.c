@@ -43,6 +43,10 @@ void geninterrupt(uint8_t n) {
 	);
 }
 
+void register_timer_interrupt(pit_handler handler) {
+	pit_set_timer_handler(handler);
+}
+
 uint8 inbyte(uint16_t port) {
 	uint8 ret;
 	asm("inb %0, %1" : "=a" (ret) : "d" (port));

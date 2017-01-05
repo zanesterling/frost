@@ -313,7 +313,7 @@ void i86_kbrd_irq() {
 		}
 	}
 
-	interruptdone(0);
+	interruptdone(1);
 	IRQ_SUFFIX();
 }
 

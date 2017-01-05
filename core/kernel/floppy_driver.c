@@ -6,6 +6,8 @@
 #define HEADS_PER_TRACK 2
 #define TOTAL_SECTORS 2880
 
+#define FLOPPY_BASE 0x3f0
+
 // Digital output register bitflags
 #define DOR_ENABLE_IRQ_DMA (1 << 3)
 #define DOR_NORMAL_MODE    (1 << 2)
@@ -53,28 +55,22 @@ void _lba_to_chs(
 );
 uint32_t _chs_to_lba(uint16_t track, uint16_t head, uint16_t sector);
 
+void _prepare_for_dma_read();
+
+
 // reads a sector into buffer
 void _read_sector_chs(
 	uint8_t drive, uint16_t track, uint16_t head, uint16_t sector
 );
 
-void _init_floppy_controller();
+void _floppy_init_dma();
 
 
 // PUBLIC FUNCTION IMPLS
 void floppy_init_driver() {
+	//outbyte(, DOR_ENABLE_IRQ_DMA | FLOPPY_DEVICE_2);
+	_floppy_init_dma();
 	buflock.locked = 0;
-	outbyte(SINGLE_CHAN_MASK_REG, 0x06);
-	outbyte(FLIPFLOP_RESET_REG, 0xff);
-
-	outbyte(START_ADDR_REG_CHAN_2, 0); // low byte
-	outbyte(START_ADDR_REG_CHAN_2, 0x10); // high byte
-	outbyte(FLIPFLOP_RESET_REG, 0xff);
-
-	outbyte(COUNT_REG_CHAN_2, 0xff); // low byte
-	outbyte(COUNT_REG_CHAN_2, 0x23); // high byte
-	outbyte(0x81, 0);
-	outbyte(SINGLE_CHAN_MASK_REG, 0x02);
 }
 
 void floppy_read_sector(void* dst, uint32_t sector_num) {
@@ -111,4 +107,42 @@ uint32_t _chs_to_lba(uint16_t track, uint16_t head, uint16_t sector) {
 void _read_sector_chs(
 	uint8_t drive, uint16_t track, uint16_t head, uint16_t sector
 ) {
+	// init/reset the controller if needed
+	_prepare_for_dma_read();
+
+	// select the drive if needed
+
+	// set up the floppy controller for DMA using the "specify" command
+	// seek to the correct cylinder
+	// issue a sense interrupt command
+	// then issue the standard read/write commands
+
+	// The controller will send an IRQ6 when the transfer is complete
+	// Then read the "result" bytes to see if there were any errors
+}
+
+void _floppy_init_dma() {
+	outbyte(SINGLE_CHAN_MASK_REG, 0x06);
+	outbyte(FLIPFLOP_RESET_REG, 0xff);
+
+	outbyte(START_ADDR_REG_CHAN_2, 0); // low byte
+	outbyte(START_ADDR_REG_CHAN_2, 0x10); // high byte
+	outbyte(FLIPFLOP_RESET_REG, 0xff);
+
+	outbyte(COUNT_REG_CHAN_2, 0xff); // low byte
+	outbyte(COUNT_REG_CHAN_2, 0x23); // high byte
+	outbyte(0x81, 0);
+	outbyte(SINGLE_CHAN_MASK_REG, 0x02);
+}
+
+void _prepare_for_dma_read() {
+	outbyte(START_ADDR_REG_CHAN_2, 6);
+	outbyte(COUNT_REG_CHAN_2, 0x5a);
+	outbyte(START_ADDR_REG_CHAN_2, 2);
+}
+
+void _prepare_for_dma_write() {
+	outbyte(START_ADDR_REG_CHAN_2, 6);
+	outbyte(COUNT_REG_CHAN_2, 0x56);
+	outbyte(START_ADDR_REG_CHAN_2, 2);
 }

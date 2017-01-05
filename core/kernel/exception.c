@@ -109,4 +109,7 @@ void install_handlers() {
 	setvect (17, alignment_check_fault);
 	setvect (18, machine_check_abort);
 	setvect (19, simd_fpu_fault);
+
+	init_scheduler();
+	setvect(32, scheduler_tick_handler);
 }

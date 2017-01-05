@@ -14,6 +14,7 @@
 #define I86_PIT_REG_COMMAND  0x43
 
 uint32_t _pit_ticks = 0;
+pit_handler _timer_interrupt_handler = NULL;
 
 void set_counter() {
 	uint16_t count = 1193180 / 100;
@@ -22,18 +23,15 @@ void set_counter() {
 }
 
 void i86_pit_irq() {
-	asm(
-		"pushad\n"
-	);
+	IRQ_PREFACE();
 
 	_pit_ticks++;
 	interruptdone(0);
+	if (_timer_interrupt_handler != NULL) {
+		_timer_interrupt_handler();
+	}
 
-	asm(
-		"popad\n"
-		"leave\n"
-		"iretd\n"
-	);
+	IRQ_SUFFIX();
 }
 
 void i86_pit_send_command(uint8_t cmd) {
@@ -69,6 +67,11 @@ void i86_pit_start_counter(uint32_t freq, uint8_t counter, uint8_t mode) {
 
 void i86_pit_initialize() {
 	setvect(32, i86_pit_irq);
+}
+
+void pit_set_timer_handler(pit_handler handler) {
+	setvect(32, handler);
+	_timer_interrupt_handler = handler;
 }
 
 uint32_t i86_get_counter() { return _pit_ticks; }

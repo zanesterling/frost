@@ -44,3 +44,7 @@ typedef unsigned uintptr_t;
 #define INTPTR_MAX INT32_MAX
 #define UINTPTR_MAX UINT32_MAX
 
+#define false 0
+#define true  1
+
+typedef uint8_t bool;

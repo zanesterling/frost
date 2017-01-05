@@ -37,6 +37,7 @@ int init(multiboot_info* bootinfo) {
 	int hal_err = hal_initialize(bootinfo);
 	if (hal_err) return hal_err;
 
+	register_timer_interrupt(scheduler_tick_handler);
 	install_handlers();
 	enable_interrupts();
 	kbrd_install(33);

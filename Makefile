@@ -2,7 +2,7 @@
 
 CC=gcc
 OBJCOPY=objcopy
-CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
+CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel #-pedantic-errors
 LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
 BUILD_DIR=build
 QEMU = qemu-system-i386

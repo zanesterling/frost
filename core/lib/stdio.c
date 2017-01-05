@@ -1,5 +1,12 @@
 #include "stdio.h"
 
+/* Private includes */
+#include "keyboard.h"
+#include "hal.h"
+#include "scancodes.h"
+#include "stdarg.h"
+#include "string.h"
+
 /* Private stuff */
 uint8_t _CurX, _CurY;
 

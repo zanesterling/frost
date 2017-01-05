@@ -77,6 +77,10 @@ void run_cmd(char* cmd) {
 		mmap_summary();
 	} else if (strcmp(cmd, "pmem") == 0) {
 		pmem_print_summary();
+	} else if (strcmp(cmd, "sleep") == 0) {
+		puts("sleeping...");
+		sleep(100);
+		puts("done\n");
 	} else if (strcmp(cmd, "exit") == 0) {
 		_running = false;
 	} else {
@@ -90,6 +94,7 @@ void help() {
 		"clear: blank the display\n"
 		"mmap: show the BIOS memory map\n"
 		"pmem: show a summary of the physical memory allocation\n"
+		"sleep: sleep for a few seconds\n"
 		"exit: exit FrOSt\n"
 	);
 }
