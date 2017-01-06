@@ -52,10 +52,8 @@ void sleep(uint32_t ticks) {
 		"sti\n"
 		"loop: hlt\n"
 		"jmp loop\n"
+		"after: nop\n"
 	);
-
-	// Removing this nop fakes out the puts("done") in the shell.
-	after: asm("nop\n");
 	return;
 }
 
