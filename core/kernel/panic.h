@@ -3,4 +3,4 @@
 #include <hal.h>
 #include <stdio.h>
 
-void kernel_panic(char* err_msg);
+void panic(char* err_msg);

@@ -1,92 +1,92 @@
 #include "exception.h"
 
 void divide_by_zero_fault() {
-	kernel_panic("Divide by 0");
+	panic("Divide by 0");
 	for (;;);
 }
 
 void single_step_trap() {
-	kernel_panic("Single step trap");
+	panic("Single step trap");
 	for(;;);
 }
 
 void nmi_trap() {
-	kernel_panic("NMI trap");
+	panic("NMI trap");
 	for(;;);
 }
 
 void breakpoint_trap() {
-	kernel_panic("Breakpoint trap");
+	panic("Breakpoint trap");
 	for(;;);
 }
 
 void overflow_trap() {
-	kernel_panic("Overflow trap");
+	panic("Overflow trap");
 	for(;;);
 }
 
 void bounds_check_fault() {
-	kernel_panic("Bounds check fault");
+	panic("Bounds check fault");
 	for(;;);
 }
 
 void invalid_opcode_fault() {
-	kernel_panic("Invalid opcode");
+	panic("Invalid opcode");
 	for(;;);
 }
 
 void no_device_fault() {
-	kernel_panic("No device fault");
+	panic("No device fault");
 	for(;;);
 }
 
 void double_fault_abort() {
-	kernel_panic("Double fault abort");
+	panic("Double fault abort");
 	for(;;);
 }
 
 void invalid_tss_fault() {
-	kernel_panic("Invalid TSS fault");
+	panic("Invalid TSS fault");
 	for(;;);
 }
 
 void no_segment_fault() {
-	kernel_panic("No segment fault");
+	panic("No segment fault");
 	for(;;);
 }
 
 void stack_fault() {
-	kernel_panic("Stack fault");
+	panic("Stack fault");
 	for(;;);
 }
 
 void general_protection_fault() {
-	kernel_panic("General Protection Fault *salutes*");
+	panic("General Protection Fault *salutes*");
 	for(;;);
 }
 
 void page_fault() {
-	kernel_panic("Page fault");
+	panic("Page fault");
 	for(;;);
 }
 
 void fpu_fault() {
-	kernel_panic("FPU fault");
+	panic("FPU fault");
 	for(;;);
 }
 
 void alignment_check_fault() {
-	kernel_panic("Alignment check fault");
+	panic("Alignment check fault");
 	for(;;);
 }
 
 void machine_check_abort() {
-	kernel_panic("Machine check abort");
+	panic("Machine check abort");
 	for(;;);
 }
 
 void simd_fpu_fault() {
-	kernel_panic("SIMD FPU fault");
+	panic("SIMD FPU fault");
 	for(;;);
 }
 

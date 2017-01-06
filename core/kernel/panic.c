@@ -1,6 +1,6 @@
 #include "panic.h"
 
-void kernel_panic(char* err_msg) {
+void panic(char* err_msg) {
 	// disable all interrupts
 	disable_interrupts();
 
