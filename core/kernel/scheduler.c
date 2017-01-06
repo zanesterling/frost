@@ -16,10 +16,7 @@ void init_scheduler() {
 }
 
 void scheduler_tick_handler() {
-	asm(
-		"pushad\n"
-		::: "memory", "esp"
-	);
+	IRQ_PREFACE();
 
 	if (_thread_sleeping) {
 		if (_sleeper.ticks_to_sleep > 0) {
@@ -34,32 +31,23 @@ void scheduler_tick_handler() {
 	}
 
 	interruptdone(0);
-	asm(
-		"popad\n"
-		"leave\n"
-		"iretd\n"
-		::: "memory", "esp"
-	);
+	IRQ_SUFFIX();
 }
 
 void sleep(uint32_t ticks) {
-	asm(
-		"pushad\n"
-		"cli\n"
-	);
+	asm("cli");
 
+	// TODO: make threadsafe
 	if (_thread_sleeping) {
-		puts("error: tried to sleep while a thread was sleeping\n");
-		asm(
-			"cli\n"
-			"hlt\n"
-		);
+		panic("scheduler: tried to sleep while a thread was sleeping");
 	}
 	_thread_sleeping = true;
 
 	// store return address of sleeper
-	_sleeper.ret_addr = &&after;
 	_sleeper.ticks_to_sleep = ticks;
+	asm("mov %0, after\n" : "=r" (_sleeper.ret_addr));
+
+	// halt until awoken
 	asm(
 		"sti\n"
 		"loop: hlt\n"

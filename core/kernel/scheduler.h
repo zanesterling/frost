@@ -1,9 +1,12 @@
 #pragma once
 
 #include <hal.h>
+#include <irq.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#include "panic.h"
 
 void init_scheduler();
 void scheduler_tick_handler();
