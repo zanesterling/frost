@@ -5,7 +5,7 @@
 
 void hexdump(void* buf, uint32_t len) {
 	char* p = buf;
-	for (int row = 0; row < len / ROW_WIDTH; row++) {
+	for (uint32_t row = 0; row < len / ROW_WIDTH; row++) {
 		printf("%08x  ", row * ROW_WIDTH);
 
 		for (int k = 0; k < 2; k++) {
@@ -31,15 +31,15 @@ void hexdump(void* buf, uint32_t len) {
 	if (remainder > 0) {
 		printf("%08x  ", len - remainder);
 
-		hex_out:
 		for (int k = 0; k < 2; k++) {
 			for (int i = 0; i < HALF_ROW; i++) {
-				uint32_t index = row * ROW_WIDTH + k * HALF_ROW + i;
-				if (index >= len) break hex_out;
-				printf("%02x ", p[row * ROW_WIDTH + k * HALF_ROW + i]);
+				uint32_t index = (len - remainder) + k * HALF_ROW + i;
+				if (index >= len) goto hex_out;
+				printf("%02x ", p[index]);
 			}
 			putch(' ');
 		}
+		hex_out:;
 
 		int neg_remainder = ROW_WIDTH - remainder;
 		int to_write = neg_remainder * 3
