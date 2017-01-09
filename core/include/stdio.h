@@ -23,11 +23,20 @@ void update_cursor();
 void clear_screen();
 void clear_rest_of_row();
 
-void itoa(const int64_t x, char* buf);
-void itoa_unsigned(const uint64_t x, char* buf);
-void itoa_s(const int64_t x, char* buf, const uint8_t base, const char* base_chars);
-void itoa_s_unsigned(
-	const uint64_t x, char* buf, const uint8_t base, const char* base_chars
+int itoa(const int64_t x, char* buf);
+int itoa_unsigned(const uint64_t x, char* buf);
+int itoa_hex(uint64_t x, char* buf);
+int itoa_s(
+	const int64_t x,
+	char* buf,
+	const uint8_t base,
+	const char* base_chars
+);
+int itoa_s_unsigned(
+	const uint64_t x,
+	char* buf,
+	const uint8_t base,
+	const char* base_chars
 );
 
 char getch();

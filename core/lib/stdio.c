@@ -8,14 +8,23 @@
 #include "string.h"
 
 /* Private stuff */
+enum printf_mode {
+	MODE_FLAG,
+	MODE_FIELD_WIDTH,
+	MODE_PRECISION,
+	MODE_FORMAT,
+	MODE_DONE,
+};
+
 uint8_t _CurX, _CurY;
 
 static const char base_10_chars[10] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 };
-static const char hex_chars[16] = {
+static const char HEX_CHARS[16] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
+static const char* OCTAL_CHARS = HEX_CHARS;
 
 #define STEP_CURSOR() _CurX++; \
 	if (_CurX == COLS) { \
@@ -25,6 +34,7 @@ static const char hex_chars[16] = {
 
 void _raw_putch(const char c);
 
+const char* _printf_do_escape(const char*, va_list*);
 
 /* Public stuff */
 void putch(const char c) {
@@ -79,9 +89,6 @@ void puts(const char* str) {
 
 void printf(const char* fmt, ...) {
 	const char *p;
-	int x;
-	char* str;
-	char buf[32];
 	va_list argp;
 	va_start(argp, fmt);
 
@@ -91,67 +98,7 @@ void printf(const char* fmt, ...) {
 			continue;
 		}
 
-		uint8_t length = 2;
-
-		uint8_t done = 0;
-		while (!done) {
-			switch (*++p) {
-				case 'l':
-					length++;
-					break;
-
-				case 'c':
-					x = va_arg(argp, int);
-					putch(x);
-					done = 1;
-					break;
-
-				case 'd':
-				case 'i':
-					if (length == 0) x = va_arg(argp, char);
-					else if (length == 1) x = va_arg(argp, short);
-					else if (length == 2) x = va_arg(argp, int);
-					else if (length == 3) x = va_arg(argp, long);
-					else if (length == 4) x = va_arg(argp, long long);
-					itoa(x, buf);
-					puts(buf);
-					done = 1;
-					break;
-
-				case 'u':
-					if (length == 0) x = va_arg(argp, unsigned char);
-					else if (length == 1) x = va_arg(argp, unsigned short);
-					else if (length == 2) x = va_arg(argp, unsigned int);
-					else if (length == 3) x = va_arg(argp, unsigned long);
-					else if (length == 4) x = va_arg(argp, unsigned long long);
-					itoa_unsigned(x, buf);
-					puts(buf);
-					done = 1;
-					break;
-
-				case 'x':
-					if (length == 0) x = va_arg(argp, char);
-					else if (length == 1) x = va_arg(argp, short);
-					else if (length == 2) x = va_arg(argp, int);
-					else if (length == 3) x = va_arg(argp, long);
-					else if (length == 4) x = va_arg(argp, long long);
-					itoa_s_unsigned(x, buf, 16, hex_chars);
-					puts(buf);
-					done = 1;
-					break;
-
-				case 's':
-					str = va_arg(argp, char*);
-					while (*str) putch(*str++);
-					done = 1;
-					break;
-
-				case '%':
-					putch('%');
-					done = 1;
-					break;
-			}
-		}
+		p = _printf_do_escape(p, &argp);
 	}
 }
 
@@ -193,19 +140,28 @@ void update_cursor() {
 
 /* UTILITIES */
 
-void itoa(int64_t x, char* buf) {
-	itoa_s(x, buf, 10, base_10_chars);
+int itoa(int64_t x, char* buf) {
+	return itoa_s(x, buf, 10, base_10_chars);
 }
 
-void itoa_unsigned(uint64_t x, char* buf) {
-	itoa_s_unsigned(x, buf, 10, base_10_chars);
+int itoa_unsigned(uint64_t x, char* buf) {
+	return itoa_s_unsigned(x, buf, 10, base_10_chars);
 }
 
-void itoa_s(int64_t x, char* buf, const uint8_t base, const char* base_chars) {
+int itoa_hex(uint64_t x, char* buf) {
+	return itoa_s_unsigned(x, buf, 16, HEX_CHARS);
+}
+
+int itoa_s(
+	int64_t x,
+	char* buf,
+	const uint8_t base,
+	const char* base_chars
+) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
 		buf[1] = '\0';
-		return;
+		return 1;
 	}
 
 	bool negative = x < 0;
@@ -231,15 +187,17 @@ void itoa_s(int64_t x, char* buf, const uint8_t base, const char* base_chars) {
 		}
 		buf[0] = '-';
 	}
+
+	return len;
 }
 
-void itoa_s_unsigned(
+int itoa_s_unsigned(
 	uint64_t x, char* buf, const uint8_t base, const char* base_chars
 ) {
 	if (x == 0) {
 		buf[0] = base_chars[0];
 		buf[1] = '\0';
-		return;
+		return 1;
 	}
 
 	uint8_t len = 0;
@@ -249,12 +207,14 @@ void itoa_s_unsigned(
 	}
 
 	/* int gets put in backwards, reverse it */
-	for (uint8 i = 0; i < len / 2; i++) {
+	for (uint8_t i = 0; i < len / 2; i++) {
 		char tmp = buf[i];
 		buf[i] = buf[len-1 - i];
 		buf[len-1 - i] = tmp;
 	}
 	buf[len] = '\0';
+
+	return len;
 }
 
 /* INPUT */
@@ -271,4 +231,145 @@ uint8 getScancode() {
 		uint8 c = inbyte(0x60);
 		if (c) return c;
 	}
+}
+
+
+/* PRIVATE IMPLS */
+
+const char* _printf_do_escape(const char* p, va_list* argp) {
+	// p should point at the start of the format escape
+	if (*p != '%') return p;
+
+	int64_t x;
+	char buf[32];
+	char* str;
+
+	uint8_t length = 2;
+	enum printf_mode mode = MODE_FLAG;
+	char preface_character = ' ';
+	int field_width = 0;
+	int precision = 0;
+	bool alternate_output = false;
+
+	int output_length;
+	while (mode != MODE_DONE) {
+		// handle field width / precision parsing
+		char c = *++p;
+		if ('1' <= c && c <= '9') {
+			if (mode == MODE_FLAG) {
+				mode = MODE_FIELD_WIDTH;
+				field_width = c - '0';
+			} else if (mode == MODE_FIELD_WIDTH) {
+				field_width = field_width * 10 + (c - '0');
+			} else if (mode == MODE_PRECISION) {
+				precision = precision * 10 + (c - '0');
+			}
+			continue;
+		}
+
+		// handle flags, output types
+		switch (c) {
+			case '0':
+				if (mode == MODE_FLAG) {
+					preface_character = '0';
+				} else if (mode == MODE_FIELD_WIDTH) {
+					field_width = field_width * 10;
+				} else if (mode == MODE_PRECISION) {
+					precision = precision * 10;
+				}
+				break;
+
+			case '#':
+				alternate_output = true;
+				break;
+
+			case 'l':
+				length++;
+				break;
+
+			case 'c':
+				x = va_arg(*argp, int);
+				putch(x);
+				mode = MODE_DONE;
+				break;
+
+			case 'd':
+			case 'i':
+				if (length == 0) x = va_arg(*argp, char);
+				else if (length == 1) x = va_arg(*argp, short);
+				else if (length == 2) x = va_arg(*argp, int);
+				else if (length == 3) x = va_arg(*argp, long);
+				else if (length == 4) x = va_arg(*argp, long long);
+				output_length = itoa(x, buf);
+				for (; field_width > output_length; field_width--) {
+					putch(preface_character);
+				}
+				puts(buf);
+				mode = MODE_DONE;
+				break;
+
+			case 'u':
+				if (length == 0) x = va_arg(*argp, unsigned char);
+				else if (length == 1) x = va_arg(*argp, unsigned short);
+				else if (length == 2) x = va_arg(*argp, unsigned int);
+				else if (length == 3) x = va_arg(*argp, unsigned long);
+				else if (length == 4) x = va_arg(*argp, unsigned long long);
+				output_length = itoa_unsigned(x, buf);
+				for (; field_width > output_length; field_width--) {
+					putch(preface_character);
+				}
+				puts(buf);
+				mode = MODE_DONE;
+				break;
+
+			case 'o':
+				if (length == 0) x = va_arg(*argp, char);
+				else if (length == 1) x = va_arg(*argp, short);
+				else if (length == 2) x = va_arg(*argp, int);
+				else if (length == 3) x = va_arg(*argp, long);
+				else if (length == 4) x = va_arg(*argp, long long);
+				if (alternate_output) {
+					field_width -= 1;
+					putch('0');
+				}
+				output_length = itoa_s_unsigned(x, buf, 8, OCTAL_CHARS);
+				for (; field_width > output_length; field_width--) {
+					putch(preface_character);
+				}
+				puts(buf);
+				mode = MODE_DONE;
+				break;
+
+			case 'x':
+				if (length == 0) x = va_arg(*argp, unsigned char);
+				else if (length == 1) x = va_arg(*argp, unsigned short);
+				else if (length == 2) x = va_arg(*argp, unsigned int);
+				else if (length == 3) x = va_arg(*argp, unsigned long);
+				else if (length == 4) x = va_arg(*argp, unsigned long long);
+				if (alternate_output) {
+					field_width -= 2;
+					puts("0x");
+				}
+				output_length = itoa_s_unsigned(x, buf, 16, HEX_CHARS);
+				for (; field_width > output_length; field_width--) {
+					putch(preface_character);
+				}
+				puts(buf);
+				mode = MODE_DONE;
+				break;
+
+			case 's':
+				str = va_arg(*argp, char*);
+				while (*str) putch(*str++);
+				mode = MODE_DONE;
+				break;
+
+			case '%':
+				putch('%');
+				mode = MODE_DONE;
+				break;
+		}
+	}
+
+	return p;
 }
