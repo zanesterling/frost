@@ -16,7 +16,7 @@ enum printf_mode {
 	MODE_DONE,
 };
 
-uint8_t _CurX, _CurY;
+uint8_t _CurX = 0, _CurY = 0;
 
 static const char base_10_chars[10] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
@@ -38,8 +38,8 @@ const char* _printf_do_escape(const char*, va_list*);
 
 /* Public stuff */
 void putch(const char c) {
-	if (_CurY == ROWS) {
-		scroll(1);
+	if (_CurY >= ROWS) {
+		scroll(_CurY - ROWS + 1);
 	}
 
 	if (c == '\n') {
