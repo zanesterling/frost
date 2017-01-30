@@ -200,19 +200,19 @@ Stage3:
         call ElfLoadBinary
 
         shr ecx, 9
+        add ecx, 1
         mov edx, ecx
 
     ;********************************;
     ;   Execute kernel
     ;********************************;
+        cli
+        mov eax, 0x2BADB002
+        mov ebx, 0
 
-    cli
-    mov eax, 0x2BADB002
-    mov ebx, 0
-
-    push dword boot_info
-    push dword STOP; junk return address
-    jmp CODE_DESC:IMAGE_PMODE_BASE
+        push dword boot_info
+        push dword STOP; junk return address
+        jmp CODE_DESC:IMAGE_PMODE_BASE
 
     STOP:
         cli

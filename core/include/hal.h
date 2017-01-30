@@ -14,6 +14,7 @@ void        outbyte(uint16_t port, uint8_t data);
 void        setvect(uint8_t interrupt, void (* vect)());
 void (*     getvect(uint8_t interrupt) )();
 void        interruptdone(uint8_t interrupt);
+void        irq_wait(uint8_t interrupt);
 void        sound(uint8_t freq);
 const char* get_cpu_vendor();
 uint32_t    get_tick_count();

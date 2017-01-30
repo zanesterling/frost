@@ -5,10 +5,18 @@
 #include "pic.h"
 #include "pit.h"
 
+/* PRIVATE DATA */
 multiboot_info* _bootinfo = 0;
+
+uint32_t _sleepers[256];
+
+
+/* PUBLIC FUNCTION IMPLS */
+
 multiboot_info* get_bootinfo() { return _bootinfo; }
 
 int hal_initialize(multiboot_info* bootinfo) {
+	printf("_sleepers: %#08x\n", _sleepers);
 	int err = i86_gdt_initialize();
 	if (err) return err;
 
@@ -22,6 +30,8 @@ int hal_initialize(multiboot_info* bootinfo) {
 	);
 
 	_bootinfo = bootinfo;
+
+	memset(_sleepers, 0, sizeof(_sleepers));
 
 	return 0;
 }
@@ -71,10 +81,38 @@ I86_IRQ_HANDLER getvect(uint8_t interrupt) {
 	return (I86_IRQ_HANDLER)(desc.baseLow + (desc.baseHigh << 16));
 }
 
-inline void interruptdone(uint8_t interrupt) {
-	if (interrupt > 16) return;
-	uint8_t picNum = (interrupt >= 8) ? 1 : 0;
-	i86_pic_send_command(I86_PIC_OCW2_MASK_EOI, picNum);
+void interruptdone(uint8_t interrupt) {
+	if (interrupt <= 16) {
+		uint8_t picNum = (interrupt >= 8) ? 1 : 0;
+		i86_pic_send_command(I86_PIC_OCW2_MASK_EOI, picNum);
+	}
+
+	// if there's a sleeper waiting, wake him up
+	if (false && (_sleepers[interrupt] != NULL)) {
+		asm(
+			"mov dword [ebp + 4], %0\n"
+			:: "r" (_sleepers[interrupt])
+		);
+	}
+}
+
+void irq_wait(uint8_t interrupt) {
+	asm("cli\n");
+
+	if (_sleepers[interrupt] != NULL) {
+		puts("irq_wait: tried to wait on an irq being waited on");
+		asm("cli\nhlt\n");
+	}
+
+	// save post-loop return addr in sleepr table
+	//asm("mov %0, awaken\n" : "=r" (_sleepers[interrupt]));
+
+	asm(
+		"sti\n"
+		"sleep: hlt\n"
+		"jmp sleep\n"
+		"awaken: nop\n"
+	);
 }
 
 void sound(uint8_t freq) {

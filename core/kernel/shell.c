@@ -111,7 +111,7 @@ void mmap_summary() {
 		mmap_entry entry = ((mmap_entry*) bootinfo->mmap_addr)[i];
 
 		printf(
-			"  0x%llx - 0x%llx: %s\n",
+			"  %#012llx - %#012llx: %s\n",
 			entry.base_address,
 			entry.base_address + entry.length,
 			TYPE_STRING(entry.type)

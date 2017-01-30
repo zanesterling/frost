@@ -9,6 +9,7 @@
 #endif
 
 #include <bootinfo.h>
+#include <stdio.h>
 
 extern int kernel_main(multiboot_info* info);
 

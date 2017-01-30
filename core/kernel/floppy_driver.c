@@ -27,6 +27,7 @@
 // ====== Floppy DMA defines ======
 #define DMA_CHANNEL 2
 
+/*
 // register ports (chan 0-3)
 #define START_ADDR_REG_CHAN_1  0x02
 #define COUNT_REG_CHAN_1       0x03
@@ -44,6 +45,7 @@
 #define MASTER_RESET_REG       0x0d
 #define MASK_RESET_REG         0x0e
 #define MULTI_CHAN_MASK_REG    0x0f
+*/
 
 SpinLock buflock;
 uint8_t buffer[BYTES_PER_SECTOR];
@@ -56,6 +58,8 @@ void _lba_to_chs(
 uint32_t _chs_to_lba(uint16_t track, uint16_t head, uint16_t sector);
 
 void _prepare_for_dma_read();
+void _floppy_write_command(int base, char cmd);
+uint8_t _floppy_read_data(int base);
 
 
 // reads a sector into buffer
@@ -63,13 +67,13 @@ void _read_sector_chs(
 	uint8_t drive, uint16_t track, uint16_t head, uint16_t sector
 );
 
-void _floppy_init_dma();
+//void _floppy_init_dma();
 
 
 // PUBLIC FUNCTION IMPLS
 void floppy_init_driver() {
 	//outbyte(, DOR_ENABLE_IRQ_DMA | FLOPPY_DEVICE_2);
-	_floppy_init_dma();
+	//_floppy_init_dma();
 	buflock.locked = 0;
 }
 
@@ -108,7 +112,7 @@ void _read_sector_chs(
 	uint8_t drive, uint16_t track, uint16_t head, uint16_t sector
 ) {
 	// init/reset the controller if needed
-	_prepare_for_dma_read();
+	//_prepare_for_dma_read();
 
 	// select the drive if needed
 
@@ -121,6 +125,7 @@ void _read_sector_chs(
 	// Then read the "result" bytes to see if there were any errors
 }
 
+/*
 void _floppy_init_dma() {
 	outbyte(SINGLE_CHAN_MASK_REG, 0x06);
 	outbyte(FLIPFLOP_RESET_REG, 0xff);
@@ -145,4 +150,27 @@ void _prepare_for_dma_write() {
 	outbyte(START_ADDR_REG_CHAN_2, 6);
 	outbyte(COUNT_REG_CHAN_2, 0x56);
 	outbyte(START_ADDR_REG_CHAN_2, 2);
+}
+*/
+
+void _floppy_write_command(int base, char cmd) {
+	for (int i = 0; i < 600; i++) {
+		sleep(1);
+		if (MSR_FIFO_OK & inbyte(base + MAIN_STATUS_REGISTER)) {
+			outbyte(base + DIGITAL_OUTPUT_REGISTER, cmd);
+			return;
+		}
+	}
+	panic("_floppy_write_command: timeout");
+}
+
+uint8_t _floppy_read_data(int base) {
+	for (int i = 0; i < 600; i++) {
+		sleep(1);
+		if (MSR_FIFO_OK & inbyte(base + MAIN_STATUS_REGISTER)) {
+			return inbyte(base + DATA_FIFO);
+		}
+	}
+	panic("_floppy_read_data: timeout");
+	return 0; // unreachable
 }
