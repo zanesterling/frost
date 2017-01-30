@@ -37,7 +37,7 @@ all: $(IMAGE)
 run: $(IMAGE)
 	$(QEMU) -fda $(IMAGE) $(QEMU_FLAGS)
 
-run-debug: $(IMAGE)
+debug: $(IMAGE)
 	$(QEMU) -fda $(IMAGE) $(QEMU_FLAGS) -s -S
 
 $(IMAGE): build_dir $(BIN_FILES)
