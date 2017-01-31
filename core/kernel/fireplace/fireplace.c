@@ -3,12 +3,11 @@
 
 /* PRIVATE DEFINITONS */
 
-#define VIEW_WIDTH  80
-#define VIEW_HEIGHT 25
+#define VIEW_WIDTH  COLS
+#define VIEW_HEIGHT ROWS
 
 struct fireplace {
 	uint8_t buf[VIEW_WIDTH * VIEW_HEIGHT];
-	int width, height;
 };
 
 struct fireplace _fireplace_new();
@@ -18,21 +17,20 @@ void _fireplace_render(struct fireplace*);
 int16_t _get(struct fireplace* f, int x, int y);
 void _set(struct fireplace* f, int x, int y, uint8_t val);
 
-uint8_t COLORS[8] = { 0x0, 0x8, 0x6, 0x4, 0xc, 0xe, 0x9, 0xf };
-
 /* PUBLIC IMPLS */
 
 void fireplace_run() {
 	int c;
-	struct fireplace fireplace = _fireplace_new();
+	struct fireplace f = _fireplace_new();
+	int x;
 
 	do {
-		_fireplace_update(&fireplace);
-		_fireplace_render(&fireplace);
+		_fireplace_update(&f);
+		_fireplace_render(&f);
 		c = getch_nonblocking();
 	} while (c < 0);
-	putch('\n');
-	putch(c);
+
+	clear_screen();
 }
 
 
@@ -40,19 +38,17 @@ void fireplace_run() {
 
 struct fireplace _fireplace_new() {
 	struct fireplace f;
-	f.width = VIEW_WIDTH;
-	f.height = VIEW_HEIGHT;
 
 	// zero the box
-	for (int i = 0; i < f.height; i++) {
-		for (int j = 0; j < f.width; j++) {
-			f.buf[i * f.width + j] = 0;
+	for (int y = 0; y < VIEW_HEIGHT; y++) {
+		for (int x = 0; x < VIEW_WIDTH; x++) {
+			_set(&f, x, y, 0);
 		}
 	}
 
 	// add coal at the bottom
-	for (int x = 0; x < f.width; x++) {
-		f.buf[x + (f.height - 1) * f.width] = 255;
+	for (int x = 0; x < VIEW_WIDTH; x++) {
+		_set(&f, x, 0, 255);
 	}
 
 	return f;
@@ -62,31 +58,40 @@ void _fireplace_update(struct fireplace* f) {
 	struct fireplace new_f = *f;
 
 	// propagate up
-	for (int x = 0; x < f->width; x++) {
-		_set(&new_f, x, 1, _get(f, x, 0) - 1);
-	}
+	//for (int y = 1; y < VIEW_HEIGHT; y++) {
+		for (int x = 0; x < VIEW_WIDTH; x++) {
+			_set(&new_f, x, 1, _get(f, x, 0) - 4);
+		}
+	//}
 
-	for (int y = 2; y < f->height - 1; y++) {
-		for (int x = 1; x < f->width - 1; x++) {
+	for (int y = 2; y < VIEW_HEIGHT - 1; y++) {
+		for (int x = 1; x < VIEW_WIDTH - 1; x++) {
 			_set(&new_f, x, y, (
 				_get(f, x - 1, y - 1) +
 				_get(f, x + 1, y - 1) +
 				_get(f, x    , y - 2) +
 				_get(f, x    , y    )
-			) / 4);
+			) / 2);
 		}
 	}
 
-	*f = new_f;
+	memcpy(f->buf, new_f.buf, VIEW_WIDTH * VIEW_HEIGHT);
 }
 
-void _render_pixel(uint8_t val, int x, int y) {
-	draw_char_at('x', val / 32, val/ 32, x, y);
+void _render_pixel(uint16_t val, int x, int y) {
+	uint8_t COLORS[6] = {
+		0x0, 0x4, 0x6, 0xc, 0xe, 0xf
+	};
+	draw_char_at(
+		'x',
+		COLORS[(val % 128) * 6 / 128],
+		COLORS[(val - 128) * 6 / 128],
+		x, ROWS - y - 1);
 }
 
 void _fireplace_render(struct fireplace* f) {
-	for (int y = 0; y < f->height; y++) {
-		for (int x = 0; x < f->width; x++) {
+	for (int y = 0; y < VIEW_HEIGHT; y++) {
+		for (int x = 0; x < VIEW_WIDTH; x++) {
 			_render_pixel(_get(f, x, y), x, y);
 		}
 	}
@@ -94,17 +99,23 @@ void _fireplace_render(struct fireplace* f) {
 
 
 int16_t _get(struct fireplace* f, int x, int y) {
-	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
+	if (
+		x < 0 || VIEW_WIDTH <= x ||
+		y < 0 || VIEW_HEIGHT <= y
+	) {
 		return -1;
 	}
 
-	return f->buf[y * f->width + x];
+	return f->buf[y * VIEW_WIDTH + x];
 }
 
 void _set(struct fireplace* f, int x, int y, uint8_t val) {
-	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
+	if (
+		x < 0 || VIEW_WIDTH <= x ||
+		y < 0 || VIEW_HEIGHT <= y
+	) {
 		return;
 	}
 
-	f->buf[y * f->width + x] = val;
+	f->buf[y * VIEW_WIDTH + x] = val;
 }

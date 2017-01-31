@@ -76,7 +76,7 @@ void draw_char_at(
 	unsigned char* p = (unsigned char*)VID_MEM;
 	p += 2 * (y * COLS + x);
 	*p++ = c;
-	*p = fore & (back << 4);
+	*p = fore | (back << 4);
 }
 
 void _raw_putch(const char c) {
