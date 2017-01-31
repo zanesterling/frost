@@ -62,23 +62,34 @@ int16_t _get(struct fireplace* f, int x, int y) {
 	return f->buf[y * f->width + x];
 }
 
+void _set(struct fireplace* f, int x, int y, uint8_t val) {
+	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
+		return;
+	}
+
+	f->buf[y * f->width + x] = val;
+}
+
 void fireplace_update(struct fireplace* f) {
-	uint32_t num_pixels = f->width * f->height;
-	uint8_t new_buf[f->width * f->height];
+	struct fireplace new_f = *f;
 
 	// propagate up
-	for (int y = 0; y < f->height; y++) {
-		for (int x = 0; x < f->width; x++) {
-			new_buf[y * f->width + x] = (
-				_get(f, x - 1, y    ) +
-				_get(f, x + 1, y    ) +
-				_get(f, x    , y - 1) +
-				_get(f, x    , y + 1)
-			) / 4;
+	for (int x = 0; x < f->width; x++) {
+		_set(&new_f, x, 1, _get(f, x, 0) - 1);
+	}
+
+	for (int y = 2; y < f->height - 1; y++) {
+		for (int x = 1; x < f->width - 1; x++) {
+			_set(&new_f, x, y, (
+				_get(f, x - 1, y - 1) +
+				_get(f, x + 1, y - 1) +
+				_get(f, x    , y - 2) +
+				_get(f, x    , y    )
+			) / 4);
 		}
 	}
 
-	memcpy(f->buf, new_buf, num_pixels);
+	*f = new_f;
 }
 
 void fireplace_render(struct fireplace* f) {
