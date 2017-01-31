@@ -93,10 +93,14 @@ void _render_pixel(uint16_t val, int x, int y) {
 	uint8_t COLORS[6] = {
 		0x0, 0x4, 0x6, 0xc, 0xe, 0xf
 	};
+	uint8_t fore = COLORS[(val % 128) * 6 / 128];
+	uint8_t back = val > 128
+		? COLORS[(val - 128) * 6 / 128]
+		: 0;
+
 	draw_char_at(
 		'x',
-		COLORS[(val % 128) * 6 / 128],
-		COLORS[(val - 128) * 6 / 128],
+		fore, back,
 		x, ROWS - y - 1);
 }
 
