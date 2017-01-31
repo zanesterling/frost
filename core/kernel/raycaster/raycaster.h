@@ -5,4 +5,4 @@
 #include <stdio.h>
 #include <string.h>
 
-void fireplace_run();
+void raycaster_run();
