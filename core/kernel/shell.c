@@ -81,6 +81,8 @@ void run_cmd(char* cmd) {
 		puts("sleeping...");
 		sleep(100);
 		puts("done\n");
+	} else if (strcmp(cmd, "fireplace") == 0) {
+		fireplace_run();
 	} else if (strcmp(cmd, "exit") == 0) {
 		_running = false;
 	} else {
@@ -95,6 +97,7 @@ void help() {
 		"mmap: show the BIOS memory map\n"
 		"pmem: show a summary of the physical memory allocation\n"
 		"sleep: sleep for a few seconds\n"
+		"fireplace: a color display demo\n"
 		"exit: exit FrOSt\n"
 	);
 }
