@@ -40,4 +40,5 @@ int itoa_s_unsigned(
 );
 
 char getch();
+int getch_nonblocking();
 uint8 getScancode();

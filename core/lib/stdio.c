@@ -226,6 +226,13 @@ char getch() {
 	return kbrd_key_to_ascii(key);
 }
 
+int getch_nonblocking() {
+	KEYCODE key = kbrd_get_last_key();
+	if (key == KEY_UNKNOWN) return -1;
+	kbrd_discard_last_key();
+	return kbrd_key_to_ascii(key);
+}
+
 uint8 getScancode() {
 	while (1) {
 		uint8 c = inbyte(0x60);
