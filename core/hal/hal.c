@@ -88,7 +88,7 @@ void interruptdone(uint8_t interrupt) {
 	}
 
 	// if there's a sleeper waiting, wake him up
-	if (false && (_sleepers[interrupt] != NULL)) {
+	if (false && ((void*)_sleepers[interrupt] != NULL)) {
 		asm(
 			"mov dword [ebp + 4], %0\n"
 			:: "r" (_sleepers[interrupt])
@@ -99,7 +99,7 @@ void interruptdone(uint8_t interrupt) {
 void irq_wait(uint8_t interrupt) {
 	asm("cli\n");
 
-	if (_sleepers[interrupt] != NULL) {
+	if ((void*)_sleepers[interrupt] != NULL) {
 		puts("irq_wait: tried to wait on an irq being waited on");
 		asm("cli\nhlt\n");
 	}
