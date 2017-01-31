@@ -18,6 +18,7 @@ void _fireplace_render(struct fireplace*);
 int16_t _get(struct fireplace* f, int x, int y);
 void _set(struct fireplace* f, int x, int y, uint8_t val);
 
+uint8_t COLORS[8] = { 0x0, 0x8, 0x6, 0x4, 0xc, 0xe, 0x9, 0xf };
 
 /* PUBLIC IMPLS */
 
@@ -79,7 +80,16 @@ void _fireplace_update(struct fireplace* f) {
 	*f = new_f;
 }
 
+void _render_pixel(uint8_t val, int x, int y) {
+	draw_char_at('x', val / 32, val/ 32, x, y);
+}
+
 void _fireplace_render(struct fireplace* f) {
+	for (int y = 0; y < f->height; y++) {
+		for (int x = 0; x < f->width; x++) {
+			_render_pixel(_get(f, x, y), x, y);
+		}
+	}
 }
 
 

@@ -14,6 +14,14 @@ struct cursor_loc {
 };
 
 void putch(const char c);
+void draw_char_at(
+	char c,
+	uint8_t fore,
+	uint8_t back,
+	int x,
+	int y
+);
+
 void scroll(const uint8 numRows);
 void puts(const char* str);
 void printf(const char* fmt, ...);

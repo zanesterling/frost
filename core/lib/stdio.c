@@ -66,6 +66,19 @@ void putch(const char c) {
 	update_cursor();
 }
 
+void draw_char_at(
+	char c,
+	uint8_t fore,
+	uint8_t back,
+	int x,
+	int y
+) {
+	unsigned char* p = (unsigned char*)VID_MEM;
+	p += 2 * (y * COLS + x);
+	*p++ = c;
+	*p = fore & (back << 4);
+}
+
 void _raw_putch(const char c) {
 	uint8_t* p = (uint8_t*)VID_MEM + 2 * (_CurY * COLS + _CurX);
 	*p = c;
