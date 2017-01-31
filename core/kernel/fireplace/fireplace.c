@@ -11,20 +11,23 @@ struct fireplace {
 	int width, height;
 };
 
-struct fireplace fireplace_new();
-void fireplace_update(struct fireplace*);
-void fireplace_render(struct fireplace*);
+struct fireplace _fireplace_new();
+void _fireplace_update(struct fireplace*);
+void _fireplace_render(struct fireplace*);
+
+int16_t _get(struct fireplace* f, int x, int y);
+void _set(struct fireplace* f, int x, int y, uint8_t val);
 
 
 /* PUBLIC IMPLS */
 
 void fireplace_run() {
 	int c;
-	struct fireplace fireplace = fireplace_new();
+	struct fireplace fireplace = _fireplace_new();
 
 	do {
-		fireplace_update(&fireplace);
-		fireplace_render(&fireplace);
+		_fireplace_update(&fireplace);
+		_fireplace_render(&fireplace);
 		c = getch_nonblocking();
 	} while (c < 0);
 	putch('\n');
@@ -34,7 +37,7 @@ void fireplace_run() {
 
 /* PRIVATE IMPLS */
 
-struct fireplace fireplace_new() {
+struct fireplace _fireplace_new() {
 	struct fireplace f;
 	f.width = VIEW_WIDTH;
 	f.height = VIEW_HEIGHT;
@@ -54,23 +57,7 @@ struct fireplace fireplace_new() {
 	return f;
 }
 
-int16_t _get(struct fireplace* f, int x, int y) {
-	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
-		return -1;
-	}
-
-	return f->buf[y * f->width + x];
-}
-
-void _set(struct fireplace* f, int x, int y, uint8_t val) {
-	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
-		return;
-	}
-
-	f->buf[y * f->width + x] = val;
-}
-
-void fireplace_update(struct fireplace* f) {
+void _fireplace_update(struct fireplace* f) {
 	struct fireplace new_f = *f;
 
 	// propagate up
@@ -92,5 +79,22 @@ void fireplace_update(struct fireplace* f) {
 	*f = new_f;
 }
 
-void fireplace_render(struct fireplace* f) {
+void _fireplace_render(struct fireplace* f) {
+}
+
+
+int16_t _get(struct fireplace* f, int x, int y) {
+	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
+		return -1;
+	}
+
+	return f->buf[y * f->width + x];
+}
+
+void _set(struct fireplace* f, int x, int y, uint8_t val) {
+	if (x < 0 || f->width <= x || y < 0 || f->height <= y) {
+		return;
+	}
+
+	f->buf[y * f->width + x] = val;
 }
