@@ -20,8 +20,9 @@ typedef struct {
 	const bool* data;
 } Map;
 
+#define PLAYER_SPEED 0.1
 typedef struct {
-	float x, y;
+	float x, y, theta;
 	Map map;
 
 	bool w_pressed;
@@ -52,22 +53,30 @@ void raycaster_run() {
 			c = getch_nonblocking();
 			switch (c) {
 				case 'w':
-					state.w_pressed = !state.w_pressed;
+					state.w_pressed = true;
 					break;
 				case 'a':
-					state.a_pressed = !state.a_pressed;
+					state.a_pressed = true;
 					break;
 				case 's':
-					state.s_pressed = !state.s_pressed;
+					state.s_pressed = true;
 					break;
 				case 'd':
-					state.d_pressed = !state.d_pressed;
+					state.d_pressed = true;
 					break;
 				case 'q':
-					state.q_pressed = !state.q_pressed;
+					state.q_pressed = true;
 					break;
 				case 'e':
-					state.e_pressed = !state.e_pressed;
+					state.e_pressed = true;
+					break;
+				case ' ':
+					state.w_pressed = false;
+					state.a_pressed = false;
+					state.s_pressed = false;
+					state.d_pressed = false;
+					state.q_pressed = false;
+					state.e_pressed = false;
 					break;
 			}
 		} while (c != -1 && c != 'h');
@@ -83,6 +92,7 @@ RaycasterState new_RaycasterState() {
 
 	state.x = 0;
 	state.y = 0;
+	state.theta = M_TAU / 4;
 
 	state.w_pressed = false;
 	state.a_pressed = false;
@@ -106,5 +116,47 @@ Map new_Map() {
 	return map;
 }
 
-void raycaster_update(RaycasterState* state) {}
-void raycaster_render(RaycasterState* state) {}
+
+void raycaster_update(RaycasterState* state) {
+	if (state->w_pressed) {
+		state->x += PLAYER_SPEED * cos(state->theta);
+		state->y += PLAYER_SPEED * sin(state->theta);
+	}
+	if (state->a_pressed) {
+		state->x += PLAYER_SPEED * sin(state->theta);
+		state->y += PLAYER_SPEED * cos(state->theta);
+	}
+	if (state->s_pressed) {
+		state->x -= PLAYER_SPEED * cos(state->theta);
+		state->y -= PLAYER_SPEED * sin(state->theta);
+	}
+	if (state->d_pressed) {
+		state->x -= PLAYER_SPEED * cos(state->theta);
+		state->y -= PLAYER_SPEED * sin(state->theta);
+	}
+}
+
+void raycaster_render(RaycasterState* state) {
+	uint8_t column_heights[VIEW_WIDTH];
+
+	// Compute the heights of the columns
+	for (int i = 0; i < VIEW_WIDTH; i++) column_heights[i] = 1;
+
+	// Render the columns
+	for (int column = 0; column < VIEW_WIDTH; column++) {
+		uint8_t col_height = column_heights[column];
+		for (int row = 0; row < VIEW_HEIGHT / 2 - col_height; row++) {
+			draw_char_at(' ', 0, 0, column, row);
+			draw_char_at(' ', 0, 0x8, column, (VIEW_HEIGHT - 1) - row);
+		}
+
+		for (
+			int row = VIEW_HEIGHT / 2 - col_height;
+			row <= VIEW_HEIGHT / 2;
+			row++
+		) {
+			draw_char_at(' ', 0, 0xf, column, row);
+			draw_char_at(' ', 0, 0xf, column, (VIEW_HEIGHT - 1) - row);
+		}
+	}
+}

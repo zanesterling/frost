@@ -83,6 +83,8 @@ void run_cmd(char* cmd) {
 		puts("done\n");
 	} else if (strcmp(cmd, "fireplace") == 0) {
 		fireplace_run();
+	} else if (strcmp(cmd, "raycaster") == 0) {
+		raycaster_run();
 	} else if (strcmp(cmd, "exit") == 0) {
 		_running = false;
 	} else {
@@ -98,6 +100,7 @@ void help() {
 		"pmem: show a summary of the physical memory allocation\n"
 		"sleep: sleep for a few seconds\n"
 		"fireplace: a color display demo\n"
+		"raycaster: a display and input demo\n"
 		"exit: exit FrOSt\n"
 	);
 }
