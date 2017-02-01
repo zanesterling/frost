@@ -20,7 +20,8 @@ typedef struct {
 	const bool* data;
 } Map;
 
-#define PLAYER_SPEED 0.1
+#define PLAYER_MOVE_SPEED 0.1
+#define PLAYER_TURN_SPEED 0.1
 typedef struct {
 	float x, y, theta;
 	Map map;
@@ -119,21 +120,24 @@ Map new_Map() {
 
 void raycaster_update(RaycasterState* state) {
 	if (state->w_pressed) {
-		state->x += PLAYER_SPEED * cos(state->theta);
-		state->y += PLAYER_SPEED * sin(state->theta);
+		state->x += PLAYER_TURN_SPEED * cos(state->theta);
+		state->y += PLAYER_TURN_SPEED * sin(state->theta);
 	}
 	if (state->a_pressed) {
-		state->x += PLAYER_SPEED * sin(state->theta);
-		state->y += PLAYER_SPEED * cos(state->theta);
+		state->x += PLAYER_TURN_SPEED * sin(state->theta);
+		state->y += PLAYER_TURN_SPEED * cos(state->theta);
 	}
 	if (state->s_pressed) {
-		state->x -= PLAYER_SPEED * cos(state->theta);
-		state->y -= PLAYER_SPEED * sin(state->theta);
+		state->x -= PLAYER_TURN_SPEED * cos(state->theta);
+		state->y -= PLAYER_TURN_SPEED * sin(state->theta);
 	}
 	if (state->d_pressed) {
-		state->x -= PLAYER_SPEED * cos(state->theta);
-		state->y -= PLAYER_SPEED * sin(state->theta);
+		state->x -= PLAYER_TURN_SPEED * cos(state->theta);
+		state->y -= PLAYER_TURN_SPEED * sin(state->theta);
 	}
+
+	if (state->q_pressed) state->theta += PLAYER_TURN_SPEED;
+	if (state->e_pressed) state->theta -= PLAYER_TURN_SPEED;
 }
 
 void raycaster_render(RaycasterState* state) {
