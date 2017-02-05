@@ -61,6 +61,7 @@ bool _map_get(Map* map, int x, int y) {
 /* PUBLIC IMPLS */
 
 void raycaster_run() {
+	clear_screen();
 	set_render_mode(RENDER_MODE_BUFFERED);
 	move_cursor(0,0);
 
@@ -113,8 +114,8 @@ void raycaster_run() {
 RaycasterState new_RaycasterState() {
 	RaycasterState state;
 
-	state.x = 0;
-	state.y = 0;
+	state.x = 1;
+	state.y = 1;
 	state.theta = M_TAU / 4;
 
 	state.w_pressed = false;
@@ -171,7 +172,7 @@ void raycaster_render(RaycasterState* state) {
 		float render_plane_angle = asin(render_plane_x);
 		float ray_angle = state->theta + render_plane_angle;
 
-		float distance = 1;//_raycast(state, ray_angle);
+		float distance = _raycast(state, ray_angle);
 
 		if (distance < 0) {
 			column_heights[i] = 0;
@@ -273,14 +274,14 @@ float _raycast(RaycasterState* state, float ray_angle) {
 
 		// Check for out-of-bounds.
 		if (
-			0 < map_x || state->map.width  < map_x ||
-			0 < map_y || state->map.height < map_y
+			map_x < 0 || state->map.width  <= map_x ||
+			map_y < 0 || state->map.height <= map_y
 		) {
 			return -1;
 		}
 
 		// Check if ray has hit a wall.
-		if (_map_get(&state->map, map_x, map_y) > 0) hit = true;
+		hit = _map_get(&state->map, map_x, map_y);
 	}
 
 	float distance;
