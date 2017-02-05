@@ -51,10 +51,10 @@ void raycaster_render(RaycasterState*);
 float _raycast(RaycasterState*, float angle);
 
 bool _map_get(Map* map, int x, int y) {
-	if (x < 0 || map->width < x || y < 0 || map->height < y) {
+	if (x < 0 || map->width <= x || y < 0 || map->height <= y) {
 		return false;
 	}
-	return map->data[y * map->width + x];
+	return !!map->data[y * map->width + x];
 }
 
 
