@@ -190,6 +190,18 @@ LoadFile:
 	xor	cx, cx
 	mov     cl, BYTE [bpbSectorsPerCluster]
 	call	ReadSectors
+
+	cmp bx, 0xf000
+	jb .CONT
+	push ax
+	shr bx, 4
+	mov ax, es
+	add ax, bx
+	mov es, ax
+	xor bx, bx
+	pop ax
+	.CONT:
+
 	pop	ecx
 	inc	ecx			; add one more sector to counter
 	push	ecx
