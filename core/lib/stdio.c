@@ -92,7 +92,9 @@ void _raw_putch_at(const char c, uint8_t color, uint8_t x, uint8_t y) {
 void scroll(const uint8 numRows) {
 	_CurY = _CurY < numRows ? 0 : _CurY - numRows;
 	uint8_t* offset = (uint8_t*)VID_MEM + 2 * numRows * COLS;
-	memcpy((void*)VID_MEM, offset, VID_MEM_MAX - VID_MEM - 2 * numRows * COLS);
+	size_t bytes_to_copy = VID_MEM_MAX - VID_MEM - 2 * numRows * COLS;
+	memcpy((void*)VID_MEM, offset, bytes_to_copy);
+	memset((uint8_t*)VID_MEM + bytes_to_copy, 0, (VID_MEM_MAX - VID_MEM) - bytes_to_copy);
 }
 
 void puts(const char* str) {
