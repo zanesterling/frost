@@ -60,7 +60,9 @@ $(BUILD_DIR)/%.o: %.c
 	@echo 'gcc -c $+ -o $@'
 
 $(BUILD_DIR)/kernel.bin: $(MAIN_FILES) $(OBJ_FILES)
-	$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
+	@echo compiling all...
+	@$(CC) $(CFLAGS) $+ $(LFLAGS) -o $(BUILD_DIR)/kernel.bin
+	@echo done
 
 build: clean all
 force: clean all run
