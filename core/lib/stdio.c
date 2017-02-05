@@ -33,6 +33,7 @@ static const char* OCTAL_CHARS = HEX_CHARS;
 	}
 
 void _raw_putch(const char c);
+void _raw_putch_at(const char c, const uint8_t color, const uint8_t x, const uint8_t y);
 
 const char* _printf_do_escape(const char*, va_list*);
 
@@ -69,16 +70,14 @@ void draw_char_at(
 	int x,
 	int y
 ) {
-	unsigned char* p = (unsigned char*)VID_MEM;
-	p += 2 * (y * COLS + x);
-	*p++ = c;
-	*p = fore | (back << 4);
+	_raw_putch_at(c, fore | (back << 4), x, y);
 }
 
-void _raw_putch(const char c) {
-	uint8_t* p = (uint8_t*)VID_MEM + 2 * (_CurY * COLS + _CurX);
+void _raw_putch(const char c) { _raw_putch_at(c, CHAR_ATTRIB, _CurX, _CurY); }
+void _raw_putch_at(const char c, uint8_t color, uint8_t x, uint8_t y) {
+	uint8_t* p = (uint8_t*)VID_MEM + 2 * (y * COLS + x);
 	*p = c;
-	*(p+1) = CHAR_ATTRIB;
+	*(p+1) = color;
 }
 
 void scroll(const uint8 numRows) {
