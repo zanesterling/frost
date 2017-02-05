@@ -190,7 +190,7 @@ void raycaster_render(RaycasterState* state) {
 		// sky and ground
 		for (
 			int row = 0;
-			row < col_start && row < col_end;
+			row < col_start && row <= col_end;
 			row++
 		) {
 			if (row != VIEW_HEIGHT / 2) {
