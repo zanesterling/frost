@@ -171,21 +171,25 @@ void raycaster_render(RaycasterState* state) {
 		float render_plane_angle = asin(render_plane_x);
 		float ray_angle = state->theta + render_plane_angle;
 
-		float distance = _raycast(state, ray_angle);
+		float distance = 1;//_raycast(state, ray_angle);
 
 		if (distance < 0) {
-			column_heights[VIEW_WIDTH] = 0;
+			column_heights[i] = 0;
 		} else {
-			column_heights[VIEW_WIDTH] = VIEW_HEIGHT / distance;
+			column_heights[i] = (VIEW_HEIGHT / 2) / distance;
 		}
 	}
 
 	// Render the columns
 	for (int column = 0; column < VIEW_WIDTH; column++) {
 		uint8_t col_height = column_heights[column];
+		uint8_t col_start = (VIEW_HEIGHT / 2 + 1) - col_height;
+		uint8_t col_end = (VIEW_HEIGHT / 2) + col_height;
+
+		// sky and ground
 		for (
 			int row = 0;
-			row <= VIEW_HEIGHT / 2 - col_height;
+			row < col_start && row < col_end;
 			row++
 		) {
 			if (row != VIEW_HEIGHT / 2) {
@@ -197,21 +201,24 @@ void raycaster_render(RaycasterState* state) {
 			);
 		}
 
+		// columns
 		for (
-			int row = VIEW_HEIGHT / 2 - col_height + 1;
-			row <= VIEW_HEIGHT / 2;
+			int row = col_start;
+			row < col_end;
 			row++
 		) {
 			draw_char_at(' ', 0, 0xf, column, row);
-			draw_char_at(
-				' ', 0, 0xf,
-				column, (VIEW_HEIGHT - 1) - row
-			);
+		}
+
+		if (debug_render) {
+			move_cursor(0, 2);
+			printf("col_start: %d", (int)col_start);
+			move_cursor(0, 3);
+			printf("col_end:   %d", (int)col_end);
 		}
 	}
 
 	// Debug rendering
-	#define debug_render true
 	if (debug_render) {
 		move_cursor(0, 0);
 		printf("state->x: %d\n", (int)state->x);

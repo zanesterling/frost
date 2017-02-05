@@ -6,4 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
+#define debug_render false
+
 void raycaster_run();
