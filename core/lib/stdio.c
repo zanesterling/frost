@@ -17,6 +17,8 @@ enum printf_mode {
 };
 
 uint8_t _CurX = 0, _CurY = 0;
+uint8_t _buffer[VID_MEM_MAX - VID_MEM] = {0};
+enum render_mode _render_mode = RENDER_MODE_DIRECT;
 
 static const char base_10_chars[10] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
@@ -32,12 +34,19 @@ static const char* OCTAL_CHARS = HEX_CHARS;
 		_CurY++; \
 	}
 
+#define GET_BUFFER() ((_render_mode == RENDER_MODE_DIRECT) ? (uint8_t*)VID_MEM : _buffer)
+
 void _raw_putch(const char c);
 void _raw_putch_at(const char c, const uint8_t color, const uint8_t x, const uint8_t y);
 
 const char* _printf_do_escape(const char*, va_list*);
 
 /* Public stuff */
+void init_rendering() {
+	set_render_mode(RENDER_MODE_DIRECT);
+	move_cursor(0, 0);
+}
+
 void putch(const char c) {
 	if (_CurY >= ROWS) {
 		scroll(_CurY - ROWS + 1);
@@ -75,16 +84,15 @@ void draw_char_at(
 
 void _raw_putch(const char c) { _raw_putch_at(c, CHAR_ATTRIB, _CurX, _CurY); }
 void _raw_putch_at(const char c, uint8_t color, uint8_t x, uint8_t y) {
-	uint8_t* p = (uint8_t*)VID_MEM + 2 * (y * COLS + x);
+	uint8_t* p = GET_BUFFER() + 2 * (y * COLS + x);
 	*p = c;
 	*(p+1) = color;
 }
 
 void scroll(const uint8 numRows) {
 	_CurY = _CurY < numRows ? 0 : _CurY - numRows;
-	uint16* offset = (uint16*)VID_MEM;
-	offset += numRows * COLS;
-	memcpy((uint16*)VID_MEM, offset, VID_MEM_MAX - VID_MEM - 2 * numRows * COLS);
+	uint8_t* offset = (uint8_t*)VID_MEM + 2 * numRows * COLS;
+	memcpy((void*)VID_MEM, offset, VID_MEM_MAX - VID_MEM - 2 * numRows * COLS);
 }
 
 void puts(const char* str) {
@@ -388,3 +396,6 @@ const char* _printf_do_escape(const char* p, va_list* argp) {
 
 	return p;
 }
+
+void set_render_mode(enum render_mode mode) { _render_mode = mode; }
+void display() { memcpy((void*)VID_MEM, _buffer, VID_MEM_MAX - VID_MEM); }

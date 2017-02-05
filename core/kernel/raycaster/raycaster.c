@@ -61,7 +61,8 @@ bool _map_get(Map* map, int x, int y) {
 /* PUBLIC IMPLS */
 
 void raycaster_run() {
-	//set_render_mode(RENDER_MODE_BUFFERED);
+	set_render_mode(RENDER_MODE_BUFFERED);
+	move_cursor(0,0);
 
 	RaycasterState state = new_RaycasterState();
 	while (1) {
@@ -103,7 +104,7 @@ void raycaster_run() {
 		if (c == 'h') break;
 	}
 
-	//set_render_mode(RENDER_MODE_DIRECT);
+	set_render_mode(RENDER_MODE_DIRECT);
 }
 
 
@@ -217,7 +218,7 @@ void raycaster_render(RaycasterState* state) {
 		printf("state->y: %d\n", (int)state->y);
 	}
 
-	//display();
+	display();
 }
 
 float _raycast(RaycasterState* state, float ray_angle) {

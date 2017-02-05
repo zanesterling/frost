@@ -9,9 +9,16 @@
 #define CHAR_ATTRIB 15 /* white on black */
 #define TABWIDTH 4
 
+enum render_mode {
+	RENDER_MODE_DIRECT,
+	RENDER_MODE_BUFFERED,
+};
+
 struct cursor_loc {
 	uint8_t x, y;
 };
+
+void init_rendering();
 
 void putch(const char c);
 void draw_char_at(
@@ -50,3 +57,6 @@ int itoa_s_unsigned(
 char getch();
 int getch_nonblocking();
 uint8 getScancode();
+
+void set_render_mode(enum render_mode);
+void display();

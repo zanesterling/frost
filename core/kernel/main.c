@@ -7,6 +7,7 @@ int kernel_main(multiboot_info* info) {
 	asm("mov %0, edx\n" : "=m" (kernel_size));
 	kernel_size++;
 
+	init_rendering();
 	puts("Hello, world of kernels\n\n");
 	printf(
 		"Our kernel is this big: %d sectors = %d bytes\n",
