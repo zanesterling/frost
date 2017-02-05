@@ -133,8 +133,8 @@ RaycasterState new_RaycasterState() {
 Map new_Map() {
 	Map map;
 
-	map.width = MAP_WIDTH;
-	map.width = MAP_HEIGHT;
+	map.width  = MAP_WIDTH;
+	map.height = MAP_HEIGHT;
 	map.data = MAP;
 
 	return map;
@@ -242,7 +242,7 @@ float _raycast(RaycasterState* state, float ray_angle) {
 	float delta_dist_y = sqrt(1 + (ray_dir_x * ray_dir_x) / (ray_dir_y * ray_dir_y));
 
 	float side_dist_x, side_dist_y;
-	float step_x, step_y;
+	int step_x, step_y;
 	if (ray_dir_x < 0) {
 		step_x = -1;
 		side_dist_x = (ray_pos_x - map_x) * delta_dist_x;
