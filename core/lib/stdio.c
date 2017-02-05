@@ -56,11 +56,7 @@ void putch(const char c) {
 			STEP_CURSOR();
 		} while (_CurX % TABWIDTH != 0);
 	} else {
-		unsigned char* p = (unsigned char*)VID_MEM;
-		p += 2 * (_CurY * COLS + _CurX);
-		*p++ = c;
-		*p = CHAR_ATTRIB;
-
+		_raw_putch(c);
 		STEP_CURSOR();
 	}
 	update_cursor();
