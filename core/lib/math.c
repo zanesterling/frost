@@ -102,7 +102,7 @@ float atan(float x) {
 
 float sqrt(float x) {
 	float guess = x / 2;
-	float epsilon = 0.00001;
+	float epsilon = 0.0001;
 
 	while (abs(guess * guess - x) > epsilon) {
 		guess = guess / 2 + x / (2 * guess);
