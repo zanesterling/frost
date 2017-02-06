@@ -6,21 +6,27 @@
 #define VIEW_WIDTH  COLS
 #define VIEW_HEIGHT ROWS
 
-#define SCREEN_DIST  2f
-#define SCREEN_WIDTH 1f
+#define PLANE_DIST  3.0f
+#define PLANE_WIDTH 1.0f
 
-#define MAP_WIDTH  11
-#define MAP_HEIGHT 9
+#define MAP_WIDTH  17
+#define MAP_HEIGHT 15
 const uint8_t MAP[MAP_WIDTH * MAP_HEIGHT] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1,
-	1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 };
 
 typedef struct {
@@ -29,7 +35,7 @@ typedef struct {
 } Map;
 
 #define PLAYER_MOVE_SPEED 0.001
-#define PLAYER_TURN_SPEED 0.001
+#define PLAYER_TURN_SPEED 0.005
 typedef struct {
 	float x, y, theta;
 	Map map;
@@ -63,7 +69,7 @@ bool _map_get(Map* map, int x, int y) {
 void raycaster_run() {
 	clear_screen();
 	set_render_mode(RENDER_MODE_BUFFERED);
-	move_cursor(0,0);
+	move_cursor(0, 0);
 
 	RaycasterState state = new_RaycasterState();
 	while (1) {
@@ -103,6 +109,10 @@ void raycaster_run() {
 			}
 		} while (c != -1 && c != 'h');
 		if (c == 'h') break;
+
+		move_cursor(0,0);
+		printf("x: %d, y: %d, theta: %d\n", (int)state.x, (int)state.y, (int)(1000 * state.theta));
+		display();
 	}
 
 	set_render_mode(RENDER_MODE_DIRECT);
@@ -147,20 +157,26 @@ void raycaster_update(RaycasterState* state) {
 		state->y += PLAYER_TURN_SPEED * sin(state->theta);
 	}
 	if (state->a_pressed) {
-		state->x -= PLAYER_TURN_SPEED * sin(state->theta);
-		state->y += PLAYER_TURN_SPEED * cos(state->theta);
+		state->x += PLAYER_TURN_SPEED * sin(state->theta);
+		state->y -= PLAYER_TURN_SPEED * cos(state->theta);
 	}
 	if (state->s_pressed) {
 		state->x -= PLAYER_TURN_SPEED * cos(state->theta);
 		state->y -= PLAYER_TURN_SPEED * sin(state->theta);
 	}
 	if (state->d_pressed) {
-		state->x += PLAYER_TURN_SPEED * sin(state->theta);
-		state->y -= PLAYER_TURN_SPEED * cos(state->theta);
+		state->x -= PLAYER_TURN_SPEED * sin(state->theta);
+		state->y += PLAYER_TURN_SPEED * cos(state->theta);
 	}
 
-	if (state->q_pressed) state->theta += PLAYER_TURN_SPEED;
-	if (state->e_pressed) state->theta -= PLAYER_TURN_SPEED;
+	if (state->q_pressed) {
+		state->theta -= PLAYER_TURN_SPEED;
+		if (state->theta < 0) state->theta += M_TAU;
+	}
+	if (state->e_pressed) {
+		state->theta += PLAYER_TURN_SPEED;
+		if (state->theta > M_TAU) state->theta -= M_TAU;
+	}
 }
 
 void raycaster_render(RaycasterState* state) {
@@ -168,9 +184,9 @@ void raycaster_render(RaycasterState* state) {
 
 	// Compute the heights of the columns
 	for (int i = 0; i < VIEW_WIDTH; i++) {
-		float render_plane_x = 2 * i / (float)VIEW_WIDTH - 1;
-		float render_plane_angle = asin(render_plane_x);
-		float ray_angle = state->theta + render_plane_angle;
+		float camera_x = 2 * ((float)i) / VIEW_WIDTH - 1;
+		float camera_angle = asin(camera_x * PLANE_WIDTH / PLANE_DIST);
+		float ray_angle = state->theta + camera_angle;
 
 		float distance = _raycast(state, ray_angle);
 
@@ -178,12 +194,15 @@ void raycaster_render(RaycasterState* state) {
 			column_heights[i] = 0;
 		} else {
 			column_heights[i] = (VIEW_HEIGHT / 2) / distance;
+			if (column_heights[i] < 1) column_heights[i] = 1;
 		}
 	}
 
 	// Render the columns
 	for (int column = 0; column < VIEW_WIDTH; column++) {
 		uint8_t col_height = column_heights[column];
+		if (col_height > VIEW_HEIGHT / 2) col_height = VIEW_HEIGHT / 2;
+
 		uint8_t col_start = (VIEW_HEIGHT / 2 + 1) - col_height;
 		uint8_t col_end = (VIEW_HEIGHT / 2) + col_height;
 
