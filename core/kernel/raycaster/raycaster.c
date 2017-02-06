@@ -212,10 +212,10 @@ void raycaster_render(RaycasterState* state) {
 			row++
 		) {
 			if (row != VIEW_HEIGHT / 2) {
-				draw_char_at(' ', 0, 0, column, row);
+				draw_char_at(' ', 0, BLACK, column, row);
 			}
 			draw_char_at(
-				' ', 0, 0x8,
+				' ', 0, DARK_GREY,
 				column, (VIEW_HEIGHT - 1) - row
 			);
 		}
@@ -226,7 +226,7 @@ void raycaster_render(RaycasterState* state) {
 			row < col_end;
 			row++
 		) {
-			draw_char_at(' ', 0, 0xf, column, row);
+			draw_char_at(' ', 0, WHITE, column, row);
 		}
 
 		if (debug_render) {
