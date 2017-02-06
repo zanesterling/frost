@@ -9,23 +9,21 @@
 #define PLANE_DIST  1.5f
 #define PLANE_WIDTH 1.0f
 
-#define MAP_WIDTH  14
-#define MAP_HEIGHT 14
+#define MAP_WIDTH  12
+#define MAP_HEIGHT 12
 const uint8_t MAP[MAP_WIDTH * MAP_HEIGHT] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 typedef struct {
@@ -51,6 +49,7 @@ struct Hit {
 	float distance;
 	int x, y;
 	int side;
+	float height;
 };
 
 RaycasterState new_RaycasterState();
@@ -65,7 +64,7 @@ bool _map_get(Map* map, int x, int y) {
 	if (x < 0 || map->width <= x || y < 0 || map->height <= y) {
 		return false;
 	}
-	return !!map->data[y * map->width + x];
+	return map->data[y * map->width + x];
 }
 
 
@@ -185,7 +184,7 @@ void raycaster_update(RaycasterState* state) {
 }
 
 void raycaster_render(RaycasterState* state) {
-	float column_heights[VIEW_WIDTH];
+	struct Hit column_hits[VIEW_WIDTH];
 
 	// Compute the heights of the columns
 	for (int i = 0; i < VIEW_WIDTH; i++) {
@@ -194,14 +193,15 @@ void raycaster_render(RaycasterState* state) {
 		float ray_angle = state->theta + camera_angle;
 
 		struct Hit hit = _raycast(state, ray_angle);
-
-		column_heights[i] = (VIEW_HEIGHT / 2) / hit.distance;
-		if (column_heights[i] < 1) column_heights[i] = 1;
+		hit.height = (VIEW_HEIGHT / 2) / hit.distance;
+		if (hit.height < 1) hit.height = 1;
+		column_hits[i] = hit;
 	}
 
 	// Render the columns
 	for (int column = 0; column < VIEW_WIDTH; column++) {
-		uint8_t col_height = column_heights[column];
+		struct Hit col_hit = column_hits[column];
+		uint8_t col_height = col_hit.height;
 		if (col_height > VIEW_HEIGHT / 2) col_height = VIEW_HEIGHT / 2;
 
 		uint8_t col_start = (VIEW_HEIGHT / 2 + 1) - col_height;
@@ -222,13 +222,15 @@ void raycaster_render(RaycasterState* state) {
 			);
 		}
 
+		uint8_t back_color = col_hit.side == 0 ? LIGHT_BLUE : LIGHT_GREEN;//WHITE;
+
 		// columns
 		for (
 			int row = col_start;
 			row < col_end;
 			row++
 		) {
-			draw_char_at(' ', 0, WHITE, column, row);
+			draw_char_at(' ', 0, back_color, column, row);
 		}
 
 		if (debug_render) {
@@ -297,7 +299,8 @@ struct Hit _raycast(RaycasterState* state, float ray_angle) {
 			map_x < 0 || state->map.width  <= map_x ||
 			map_y < 0 || state->map.height <= map_y
 		) {
-			hit = 1;
+			hit = true;
+			break;
 		}
 
 		// Check if ray has hit a wall.
@@ -307,10 +310,10 @@ struct Hit _raycast(RaycasterState* state, float ray_angle) {
 	hit_data.x = map_x;
 	hit_data.y = map_y;
 	if (hit_data.side == 0) {
-		hit_data.x += (1 - step_x) / 2;
+		if (step_x < 0) hit_data.x++;
 		hit_data.distance = (hit_data.x - ray_pos_x) / ray_dir_x;
 	} else {
-		hit_data.y += map_y + (1 - step_y) / 2;
+		if (step_y < 0) hit_data.y++;
 		hit_data.distance = (hit_data.y - ray_pos_y) / ray_dir_y;
 	}
 	return hit_data;
