@@ -18,9 +18,9 @@ const uint8_t MAP[MAP_WIDTH * MAP_HEIGHT] = {
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -47,13 +47,19 @@ typedef struct {
 	bool e_pressed;
 } RaycasterState;
 
+struct Hit {
+	float distance;
+	int x, y;
+	int side;
+};
+
 RaycasterState new_RaycasterState();
 Map new_Map();
 
 void raycaster_update(RaycasterState*);
 void raycaster_render(RaycasterState*);
 
-float _raycast(RaycasterState*, float angle);
+struct Hit _raycast(RaycasterState*, float angle);
 
 bool _map_get(Map* map, int x, int y) {
 	if (x < 0 || map->width <= x || y < 0 || map->height <= y) {
@@ -187,14 +193,10 @@ void raycaster_render(RaycasterState* state) {
 		float camera_angle = -asin(camera_x * PLANE_WIDTH / PLANE_DIST);
 		float ray_angle = state->theta + camera_angle;
 
-		float distance = _raycast(state, ray_angle);
+		struct Hit hit = _raycast(state, ray_angle);
 
-		if (distance < 0) {
-			column_heights[i] = 0;
-		} else {
-			column_heights[i] = (VIEW_HEIGHT / 2) / distance;
-			if (column_heights[i] < 1) column_heights[i] = 1;
-		}
+		column_heights[i] = (VIEW_HEIGHT / 2) / hit.distance;
+		if (column_heights[i] < 1) column_heights[i] = 1;
 	}
 
 	// Render the columns
@@ -247,14 +249,14 @@ void raycaster_render(RaycasterState* state) {
 	display();
 }
 
-float _raycast(RaycasterState* state, float ray_angle) {
+struct Hit _raycast(RaycasterState* state, float ray_angle) {
 	float ray_pos_x = state->x;
 	float ray_pos_y = state->y;
 	float ray_dir_x = cos(ray_angle);
 	float ray_dir_y = -sin(ray_angle);
 
-	int map_x = ray_pos_x;
-	int map_y = ray_pos_y;
+	int map_x = (int)ray_pos_x;
+	int map_y = (int)ray_pos_y;
 
 	float delta_dist_x = sqrt(1 + (ray_dir_y * ray_dir_y) / (ray_dir_x * ray_dir_x));
 	float delta_dist_y = sqrt(1 + (ray_dir_x * ray_dir_x) / (ray_dir_y * ray_dir_y));
@@ -276,18 +278,18 @@ float _raycast(RaycasterState* state, float ray_angle) {
 		side_dist_y = (map_y + 1 - ray_pos_y) * delta_dist_y;
 	}
 
-	int side;
+	struct Hit hit_data;
 	bool hit = false;
 	while (!hit) {
 		// Update our position.
 		if (side_dist_x < side_dist_y) {
 			side_dist_x += delta_dist_x;
 			map_x += step_x;
-			side = 0;
+			hit_data.side = 0;
 		} else {
 			side_dist_y += delta_dist_y;
 			map_y += step_y;
-			side = 1;
+			hit_data.side = 1;
 		}
 
 		// Check for out-of-bounds.
@@ -295,18 +297,21 @@ float _raycast(RaycasterState* state, float ray_angle) {
 			map_x < 0 || state->map.width  <= map_x ||
 			map_y < 0 || state->map.height <= map_y
 		) {
-			return -1;
+			hit = 1;
 		}
 
 		// Check if ray has hit a wall.
 		hit = _map_get(&state->map, map_x, map_y);
 	}
 
-	float distance;
-	if (side == 0) {
-		distance = (map_x - ray_pos_x + (1 - step_x) / 2) / ray_dir_x;
+	hit_data.x = map_x;
+	hit_data.y = map_y;
+	if (hit_data.side == 0) {
+		hit_data.x += (1 - step_x) / 2;
+		hit_data.distance = (hit_data.x - ray_pos_x) / ray_dir_x;
 	} else {
-		distance = (map_y - ray_pos_y + (1 - step_y) / 2) / ray_dir_y;
+		hit_data.y += map_y + (1 - step_y) / 2;
+		hit_data.distance = (hit_data.y - ray_pos_y) / ray_dir_y;
 	}
-	return distance;
+	return hit_data;
 }
