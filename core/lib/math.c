@@ -103,10 +103,12 @@ float atan(float x) {
 float sqrt(float x) {
 	if (!isfinite(x)) return x;
 
+	float prev_guess = FP_INFINITE;
 	float guess = x / 2;
-	float epsilon = 0.0005;
+	float epsilon = 0.00001;
 
-	while (abs(guess * guess - x) > epsilon) {
+	while (abs(guess - prev_guess) > epsilon) {
+		prev_guess = guess;
 		guess = guess / 2 + x / (2 * guess);
 	}
 
