@@ -6,27 +6,26 @@
 #define VIEW_WIDTH  COLS
 #define VIEW_HEIGHT ROWS
 
-#define PLANE_DIST  3.0f
+#define PLANE_DIST  1.5f
 #define PLANE_WIDTH 1.0f
 
-#define MAP_WIDTH  17
-#define MAP_HEIGHT 15
+#define MAP_WIDTH  14
+#define MAP_HEIGHT 14
 const uint8_t MAP[MAP_WIDTH * MAP_HEIGHT] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 };
 
 typedef struct {
@@ -34,7 +33,7 @@ typedef struct {
 	const bool* data;
 } Map;
 
-#define PLAYER_MOVE_SPEED 0.001
+#define PLAYER_MOVE_SPEED 0.003
 #define PLAYER_TURN_SPEED 0.005
 typedef struct {
 	float x, y, theta;
@@ -124,8 +123,8 @@ void raycaster_run() {
 RaycasterState new_RaycasterState() {
 	RaycasterState state;
 
-	state.x = 1;
-	state.y = 1;
+	state.x = 2;
+	state.y = 2;
 	state.theta = M_TAU / 4;
 
 	state.w_pressed = false;
@@ -153,29 +152,29 @@ Map new_Map() {
 
 void raycaster_update(RaycasterState* state) {
 	if (state->w_pressed) {
-		state->x += PLAYER_TURN_SPEED * cos(state->theta);
-		state->y += PLAYER_TURN_SPEED * sin(state->theta);
+		state->x += PLAYER_MOVE_SPEED * cos(state->theta);
+		state->y -= PLAYER_MOVE_SPEED * sin(state->theta);
 	}
 	if (state->a_pressed) {
-		state->x += PLAYER_TURN_SPEED * sin(state->theta);
-		state->y -= PLAYER_TURN_SPEED * cos(state->theta);
+		state->x -= PLAYER_MOVE_SPEED * sin(state->theta);
+		state->y -= PLAYER_MOVE_SPEED * cos(state->theta);
 	}
 	if (state->s_pressed) {
-		state->x -= PLAYER_TURN_SPEED * cos(state->theta);
-		state->y -= PLAYER_TURN_SPEED * sin(state->theta);
+		state->x -= PLAYER_MOVE_SPEED * cos(state->theta);
+		state->y += PLAYER_MOVE_SPEED * sin(state->theta);
 	}
 	if (state->d_pressed) {
-		state->x -= PLAYER_TURN_SPEED * sin(state->theta);
-		state->y += PLAYER_TURN_SPEED * cos(state->theta);
+		state->x += PLAYER_MOVE_SPEED * sin(state->theta);
+		state->y += PLAYER_MOVE_SPEED * cos(state->theta);
 	}
 
 	if (state->q_pressed) {
-		state->theta -= PLAYER_TURN_SPEED;
-		if (state->theta < 0) state->theta += M_TAU;
-	}
-	if (state->e_pressed) {
 		state->theta += PLAYER_TURN_SPEED;
 		if (state->theta > M_TAU) state->theta -= M_TAU;
+	}
+	if (state->e_pressed) {
+		state->theta -= PLAYER_TURN_SPEED;
+		if (state->theta < 0) state->theta += M_TAU;
 	}
 }
 
@@ -185,7 +184,7 @@ void raycaster_render(RaycasterState* state) {
 	// Compute the heights of the columns
 	for (int i = 0; i < VIEW_WIDTH; i++) {
 		float camera_x = 2 * ((float)i) / VIEW_WIDTH - 1;
-		float camera_angle = asin(camera_x * PLANE_WIDTH / PLANE_DIST);
+		float camera_angle = -asin(camera_x * PLANE_WIDTH / PLANE_DIST);
 		float ray_angle = state->theta + camera_angle;
 
 		float distance = _raycast(state, ray_angle);
@@ -249,10 +248,10 @@ void raycaster_render(RaycasterState* state) {
 }
 
 float _raycast(RaycasterState* state, float ray_angle) {
-	float ray_dir_x = cos(ray_angle);
-	float ray_dir_y = sin(ray_angle);
 	float ray_pos_x = state->x;
 	float ray_pos_y = state->y;
+	float ray_dir_x = cos(ray_angle);
+	float ray_dir_y = -sin(ray_angle);
 
 	int map_x = ray_pos_x;
 	int map_y = ray_pos_y;
@@ -305,11 +304,9 @@ float _raycast(RaycasterState* state, float ray_angle) {
 
 	float distance;
 	if (side == 0) {
-		distance = (map_x - ray_pos_x + (1 - step_x) / 2)
-			/ ray_dir_x;
+		distance = (map_x - ray_pos_x + (1 - step_x) / 2) / ray_dir_x;
 	} else {
-		distance = (map_y - ray_pos_y + (1 - step_y) / 2)
-			/ ray_dir_y;
+		distance = (map_y - ray_pos_y + (1 - step_y) / 2) / ray_dir_y;
 	}
 	return distance;
 }
