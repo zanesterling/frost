@@ -1,17 +1,20 @@
 .PHONY: build_dir clean force run all
 
+# Local-specific variables
+QEMU = qemu-system-i386
 CC=gcc
 OBJCOPY=objcopy
-CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
-LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
-BUILD_DIR=build
-QEMU = qemu-system-i386
 
 ifeq ($(shell uname -s),Darwin)
 	CMD_PREFIX=/usr/local/i386-elf-gcc/bin/i386-elf-
 	CC = $(CMD_PREFIX)gcc
 	OBJCOPY = $(CMD_PREFIX)objcopy
 endif
+
+# Flags
+CFLAGS = -std=gnu99 -Wall -Wextra -m32 -Icore/include -fno-stack-protector -fno-builtin -fno-builtin-function -masm=intel -pedantic-errors
+LFLAGS = -nostdlib -Wl,-Ttext=0x100000,-nostdlib -static-libgcc -lgcc
+BUILD_DIR=build
 
 QEMU_FLAGS = -boot a -no-fd-bootchk
 ifdef MEMORY_SIZE
@@ -42,8 +45,8 @@ debug: $(IMAGE)
 
 $(IMAGE): build_dir $(BIN_FILES)
 	cat $(BUILD_DIR)/stage1.bin /dev/zero | dd of=$(IMAGE) bs=1024 count=1440
-	dcopy $(BUILD_DIR)/stage2.bin $(IMAGE) KRNLDR.SYS
-	dcopy $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
+	fatr add $(BUILD_DIR)/stage2.bin $(IMAGE) KRNLDR.SYS
+	fatr add $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
 
 build_dir:
 	mkdir -p $(BUILD_DIR)
