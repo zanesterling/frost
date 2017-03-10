@@ -5,12 +5,12 @@ First Revision Operating Systems Test (FROST)
 Get a copy of qemu and a cross-compiler for x86, and point the relevant
 configuration options in the Makefile to them.
 
-## Build
-```shell
-make build
-```
+Install [dcopy](github.com/zanesterling/dcopy), a tool for manipulating FAT12 images.
 
 ## Run
 ```shell
-make run
+# To build:
+$ make build
+# To run:
+$ make run
 ```
