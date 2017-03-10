@@ -24,7 +24,8 @@ int kernel_main(multiboot_info* info) {
 		);
 	}
 
-	run_shell();
+	raycaster_run();
+	//run_shell();
 	puts("\nThanks for using FrOSt\n");
 
 	asm(

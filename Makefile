@@ -45,8 +45,8 @@ debug: $(IMAGE)
 
 $(IMAGE): build_dir $(BIN_FILES)
 	cat $(BUILD_DIR)/stage1.bin /dev/zero | dd of=$(IMAGE) bs=1024 count=1440
-	fatr add $(BUILD_DIR)/stage2.bin $(IMAGE) KRNLDR.SYS
-	fatr add $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
+	dcopy $(BUILD_DIR)/stage2.bin $(IMAGE) KRNLDR.SYS
+	dcopy $(BUILD_DIR)/kernel.bin $(IMAGE) KERNEL.SYS
 
 build_dir:
 	mkdir -p $(BUILD_DIR)

@@ -6,7 +6,7 @@
 #define VIEW_WIDTH  COLS
 #define VIEW_HEIGHT ROWS
 
-#define PLANE_DIST  1.5f
+#define PLANE_DIST  6.0f
 #define PLANE_WIDTH 1.0f
 
 #define MAP_WIDTH  12
@@ -32,7 +32,7 @@ typedef struct {
 } Map;
 
 #define PLAYER_MOVE_SPEED 0.003
-#define PLAYER_TURN_SPEED 0.005
+#define PLAYER_TURN_SPEED 0.002
 typedef struct {
 	float x, y, theta;
 	Map map;
@@ -188,7 +188,7 @@ void raycaster_render(RaycasterState* state) {
 
 	// Compute the heights of the columns
 	for (int i = 0; i < VIEW_WIDTH; i++) {
-		float camera_x = 2 * ((float)i) / VIEW_WIDTH - 1;
+		float camera_x = (i / (float)VIEW_WIDTH) * 2 - 1;
 		float camera_angle = -asin(camera_x * PLANE_WIDTH / PLANE_DIST);
 		float ray_angle = state->theta + camera_angle;
 
